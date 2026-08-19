@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CharacterArchive/CharacterArchive.csproj" />
+  <Project Path="CharacterArchive.Tests/CharacterArchive.Tests.csproj" />
+</Solution>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\CharacterArchive\Models\CharacterRecord.cs" Link="Models\CharacterRecord.cs" />
+    <Compile Include="..\CharacterArchive\Models\JobLevelRecord.cs" Link="Models\JobLevelRecord.cs" />
+    <Compile Include="..\CharacterArchive\Services\CharacterFileLocator.cs" Link="Services\CharacterFileLocator.cs" />
+    <Compile Include="..\CharacterArchive\Services\CsvExporter.cs" Link="Services\CsvExporter.cs" />
+    <Compile Include="..\CharacterArchive\Services\LodestoneLookupService.cs" Link="Services\LodestoneLookupService.cs" />
+    <Compile Include="..\CharacterArchive\Services\PlayTimeFormatter.cs" Link="Services\PlayTimeFormatter.cs" />
+    <Compile Include="..\CharacterArchive\Models\PlayTimeDisplayMode.cs" Link="Models\PlayTimeDisplayMode.cs" />
+    <Compile Include="..\CharacterArchive\Models\DisplayLanguage.cs" Link="Models\DisplayLanguage.cs" />
+    <Compile Include="..\CharacterArchive\Services\LanguageResolver.cs" Link="Services\LanguageResolver.cs" />
+  </ItemGroup>
+</Project>

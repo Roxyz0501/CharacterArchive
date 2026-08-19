@@ -1,0 +1,14 @@
+{
+  "Name": "Character Archive",
+  "Author": "Roxyz0501",
+  "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
+  "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "character",
+    "config",
+    "csv",
+    "lodestone",
+    "playtime"
+  ]
+}
