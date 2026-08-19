@@ -15,9 +15,11 @@ Character Archive is a character-information manager for XIVLauncher / Dalamud, 
 
 ## Installation
 
-Source, issues, license, and releases will use this plugin’s individual GitHub repository. Distribution will use Roxyz0501’s shared Dalamud custom repository. Its `repo.json` URL is **not yet assigned**; replace `<ROXYZ0501_SHARED_REPO_JSON_URL>` after publication.
+Source, issues, license, and releases use this plugin’s [individual GitHub repository](https://github.com/Roxyz0501/CharacterArchive). Distribution uses Roxyz0501’s shared Dalamud custom repository:
 
-After publication, add that URL under Dalamud Settings → Experimental → Custom Plugin Repositories and install Character Archive. For local development, build Release and add the output DLL or its folder to Dev Plugin Locations.
+`https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json`
+
+Add that URL under Dalamud Settings → Experimental → Custom Plugin Repositories and install Character Archive. For local development, build Release and add the output DLL or its folder to Dev Plugin Locations.
 
 ## Usage and command
 

@@ -7,9 +7,9 @@
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
-  "RepoUrl": null,
-  "DownloadLinkInstall": null,
-  "DownloadLinkUpdate": null,
+  "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.0.0/CharacterArchive-0.5.0.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.0.0/CharacterArchive-0.5.0.0.zip",
   "Tags": [
     "character",
     "config",

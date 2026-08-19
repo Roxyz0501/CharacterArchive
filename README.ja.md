@@ -15,9 +15,11 @@ Character Archiveは、Roxyz0501が作成するXIVLauncher / Dalamud向けキャ
 
 ## 導入方法
 
-ソース、Issues、ライセンス、Releaseは本プラグイン専用GitHubリポジトリで管理し、配信はRoxyz0501の共通Dalamudカスタムリポジトリを使用します。共通`repo.json` URLは**未確定**です。公開時に`<ROXYZ0501_SHARED_REPO_JSON_URL>`を実在URLへ置き換えます。
+ソース、Issues、ライセンス、Releaseは本プラグインの[専用GitHubリポジトリ](https://github.com/Roxyz0501/CharacterArchive)で管理し、配信はRoxyz0501の共通Dalamudカスタムリポジトリを使用します。
 
-公開後はDalamud設定 → Experimental → Custom Plugin RepositoriesへURLを追加し、プラグイン一覧から導入します。ローカル確認ではReleaseビルド後のDLLまたは格納フォルダをDev Plugin Locationsへ追加します。
+`https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json`
+
+Dalamud設定 → Experimental → Custom Plugin Repositoriesへ上記URLを追加し、プラグイン一覧から導入します。ローカル確認ではReleaseビルド後のDLLまたは格納フォルダをDev Plugin Locationsへ追加します。
 
 ## 利用方法・コマンド
 
