@@ -1,6 +1,8 @@
 {
   "Name": "Character Archive",
   "Author": "Roxyz0501",
+  "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
+  "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/CharacterArchive/main/CharacterArchive/images/icon.png",
   "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",

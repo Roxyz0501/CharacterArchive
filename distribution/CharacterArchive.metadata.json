@@ -2,14 +2,15 @@
   "Author": "Roxyz0501",
   "Name": "Character Archive",
   "InternalName": "CharacterArchive",
-  "AssemblyVersion": "0.5.0.0",
+  "AssemblyVersion": "0.5.1.0",
   "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
-  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.0.0/CharacterArchive-0.5.0.0.zip",
-  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.0.0/CharacterArchive-0.5.0.0.zip",
+  "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/CharacterArchive/main/CharacterArchive/images/icon.png",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.1.0/CharacterArchive-0.5.1.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v0.5.1.0/CharacterArchive-0.5.1.0.zip",
   "Tags": [
     "character",
     "config",
@@ -18,6 +19,6 @@
     "playtime"
   ],
   "RequiredPlugins": [],
-  "ReleaseArtifact": "CharacterArchive-0.5.0.0.zip",
-  "Changelog": "Added English/Japanese UI localization with one-time first-launch language selection, localized CSV labels, and bilingual public documentation."
+  "ReleaseArtifact": "CharacterArchive-0.5.1.0.zip",
+  "Changelog": "Added a public plugin icon and explicit GitHub repository metadata for the Dalamud plugin installer."
 }

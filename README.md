@@ -83,7 +83,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The shared repository consumes `artifacts\CharacterArchive-0.5.0.0.zip` and `distribution\CharacterArchive.metadata.json`. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The shared repository consumes `artifacts\CharacterArchive-0.5.1.0.zip` and `distribution\CharacterArchive.metadata.json`. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 

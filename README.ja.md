@@ -83,7 +83,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-共通リポジトリへ渡す成果物は`artifacts\CharacterArchive-0.5.0.0.zip`と`distribution\CharacterArchive.metadata.json`です。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+共通リポジトリへ渡す成果物は`artifacts\CharacterArchive-0.5.1.0.zip`と`distribution\CharacterArchive.metadata.json`です。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 

@@ -6,11 +6,11 @@
 
 - InternalName: `CharacterArchive`
 - Name: `Character Archive`
-- AssemblyVersion: `0.5.0.0`
+- AssemblyVersion: `0.5.1.0`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
 - 必須依存プラグイン: なし
-- Release ZIP名: `CharacterArchive-0.5.0.0.zip`
+- Release ZIP名: `CharacterArchive-0.5.1.0.zip`
 
 Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは共通リポジトリ統合時に実在URLを注入します。
 
@@ -50,7 +50,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-`scripts/pack-release.ps1`は`artifacts/CharacterArchive-0.5.0.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。
+`scripts/pack-release.ps1`は`artifacts/CharacterArchive-0.5.1.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。
 
 - `CharacterArchive.dll`
 - `CharacterArchive.json`
