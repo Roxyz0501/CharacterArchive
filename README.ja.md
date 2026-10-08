@@ -27,7 +27,7 @@ Dalamud設定 → Experimental → Custom Plugin Repositoriesへ上記URLを追�
 
 ## 設定
 
-- **言語 — English / 日本語：** 初回起動時だけDalamud／ゲームクライアント言語を判定し、日本語なら日本語、それ以外または検出不能ならEnglishを選択して保存します。以後の起動では再判定・上書きせず、ユーザーが選んだ値を維持します。
+- **言語：** 日本語、English、Deutsch、Français、한국어、简体中文、繁體中文から選択します。Auto設定はありません。
 - **ログイン時にptimeを自動取得する：** 既定OFF。有効時だけコマンド解禁後、ログインごとに標準`/playtime`を1回実行します。
 - **コマンド使用可能後の待機秒数：** 1～60秒、既定1秒。
 - **プレイ時間の表示形式：** ゲーム風表示または累計時間表示。
@@ -35,6 +35,12 @@ Dalamud設定 → Experimental → Custom Plugin Repositoriesへ上記URLを追�
 - **CSV出力先：** 保存ダイアログの初期フォルダ。最終保存先は毎回選択できます。
 
 手動ptime取得は10秒制限です。通常のゲーム内テキストコマンド経路だけを使い、独自パケットの生成・直接送信・ポーリング・自動再送は行いません。
+
+### 初回の言語決定
+
+有効な保存済み言語がない場合だけ、公開APIから言語を1回決定して保存します。最初にゲームクライアント言語（`IClientState.ClientLanguage`）、次にDalamud UI言語（`IDalamudPluginInterface.UiLanguage`）を確認し、どちらも取得不能・未対応ならEnglishを選びます。現行SDKにはこのプラグインが利用できる公開ランチャー言語APIがないため、非公開ファイルや設定は読みません。保存後は起動時やキャラクター切替時に上書きしません。旧English／日本語のenum番号を維持し、欠落、旧Auto、不正値だけを一度解決します。
+
+変更は即時反映・永続保存されます。プラグイン所有のUI、状態・エラー、支援、ptime表示を7言語化しています。CSVはデータ交換仕様として、当初定義した日本語4列ヘッダー（`キャラクター名,サーバー名,ロドストID,設定ファイル名`）をUI言語にかかわらず維持します。キャラクター名やゲーム由来の種族・ジョブ・ワールド名はゲームデータが提供する表記を使い、提供されない言語を独自翻訳で補いません。
 
 ## 必要環境・依存関係
 
@@ -61,13 +67,14 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 - Lodestoneのメンテナンス、検索結果、公開状態、HTML変更によりIDや顔画像を取得できない場合があります。
 - `/playtime`は分単位のため、時間表示の秒部分は常に`00`です。
 - FFXIV更新で実行環境の構造が変わると、対応更新までptime取得が動作しない場合があります。
+- 韓国語・簡体字・繁体字の表示可否は使用中のDalamudフォントアトラスにも依存するため、公開前に実ゲームでの目視確認が必要です。
 - 利用者自身でFFXIV、XIVLauncher、Dalamudの最新規約・方針を確認してください。
 
 ## トラブルシューティング
 
 - 顔画像がない場合は個別／まとめ検索を再実行し、公開プロフィールを確認してください。
 - ログイン直後に`/playtime`が使えない場合は待機秒数を増やすか、ログイン完了後に手動再取得してください。
-- 表示言語が意図と異なる場合は設定でEnglish／日本語を選択してください。以後その値を維持します。
+- 表示言語が意図と異なる場合は設定で7言語のいずれかを選択してください。以後その値を維持します。
 - 設定フォルダがない場合は、そのWindows／FFXIV環境に対象キャラクターのフォルダが存在するか確認してください。
 
 ## アンインストール・データ削除
@@ -83,7 +90,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-共通リポジトリへ渡す成果物は`artifacts\CharacterArchive-0.5.1.0.zip`と`distribution\CharacterArchive.metadata.json`です。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+次の未公開成果物は`artifacts\CharacterArchive-0.6.0.0.zip`です。公開時に最終Release URLをメタデータへ設定してください。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 

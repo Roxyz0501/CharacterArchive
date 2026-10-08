@@ -11,12 +11,27 @@ public sealed class LocalizationService
         this.configuration = configuration;
     }
 
-    public ResolvedLanguage Current => configuration.DisplayLanguage == DisplayLanguage.Japanese
-        ? ResolvedLanguage.Japanese
-        : ResolvedLanguage.English;
+    public ResolvedLanguage Current => configuration.DisplayLanguage switch
+    {
+        DisplayLanguage.Japanese => ResolvedLanguage.Japanese,
+        DisplayLanguage.German => ResolvedLanguage.German,
+        DisplayLanguage.French => ResolvedLanguage.French,
+        DisplayLanguage.Korean => ResolvedLanguage.Korean,
+        DisplayLanguage.SimplifiedChinese => ResolvedLanguage.SimplifiedChinese,
+        DisplayLanguage.TraditionalChinese => ResolvedLanguage.TraditionalChinese,
+        _ => ResolvedLanguage.English,
+    };
 
-    public bool IsJapanese => Current == ResolvedLanguage.Japanese;
+    public string Text(string english, string japanese)
+    {
+        if (Current == ResolvedLanguage.English)
+            return english;
+        if (LocalizationCatalog.TryGet(english, Current, out var translated))
+            return translated;
+        return Current == ResolvedLanguage.Japanese ? japanese : $"[{english}]";
+    }
 
-    public string Text(string english, string japanese) => IsJapanese ? japanese : english;
+    public string Format(string englishFormat, string japaneseFormat, params object[] arguments) =>
+        string.Format(Text(englishFormat, japaneseFormat), arguments);
 
 }

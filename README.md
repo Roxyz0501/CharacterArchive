@@ -27,7 +27,7 @@ Log into a character to add or update it. Use `/chararchive` to open or close th
 
 ## Settings
 
-- **Language — English / 日本語:** On the first launch only, Japanese is selected for a Japanese Dalamud/game client; English is selected otherwise or when detection is unavailable. The result is saved. Later launches never re-detect or overwrite it; the user’s selected value remains fixed.
+- **Language:** Choose 日本語, English, Deutsch, Français, 한국어, 简体中文, or 繁體中文. There is no Auto setting.
 - **Automatically acquire ptime on login:** Off by default. When enabled, runs standard `/playtime` once per login after commands become available.
 - **Delay after commands become available:** 1–60 seconds; default 1 second.
 - **Playtime display:** Game-style or total-hours format.
@@ -35,6 +35,12 @@ Log into a character to add or update it. Use `/chararchive` to open or close th
 - **CSV output folder:** Initial folder for the save dialog; the final path is chosen for each export.
 
 Manual playtime acquisition has a 10-second rate limit. The plugin uses the normal game text-command path and does not construct or directly send custom packets, poll, or automatically retry.
+
+### Initial language selection
+
+When no valid language has been saved, the plugin resolves and saves one language once. It checks the public game-client language first (`IClientState.ClientLanguage`), then the public Dalamud UI language (`IDalamudPluginInterface.UiLanguage`), then falls back to English. The current SDK exposes no public launcher-language source used by this plugin, so no private launcher files or settings are inspected. A saved selection is never overwritten at startup, including after character changes. Legacy English/Japanese values retain their numeric values; missing, old Auto, and invalid values are resolved once.
+
+Language changes apply immediately and persist. Plugin-owned UI, status/error text, support content, and playtime text are localized. The exported CSV schema remains the stable Japanese four-column header originally defined for this plugin (`キャラクター名,サーバー名,ロドストID,設定ファイル名`) regardless of UI language. Character names and game-provided race/job/world text remain whatever the game data source provides; the plugin does not invent translations for unavailable game data.
 
 ## Requirements and dependencies
 
@@ -61,13 +67,14 @@ The plugin itself does not contact Ko-fi. The browser opens `https://ko-fi.com/r
 - Lodestone maintenance, search ambiguity, visibility, or HTML changes can prevent ID or image acquisition.
 - `/playtime` reports minutes, so the seconds field is always `00`.
 - FFXIV updates can temporarily break playtime integration until runtime structures are updated.
+- Korean, Simplified Chinese, and Traditional Chinese glyph coverage depends on the active Dalamud font atlas; in-game visual acceptance is required before publication.
 - Users are responsible for checking current FFXIV, XIVLauncher, and Dalamud policies.
 
 ## Troubleshooting
 
 - For a missing face image, retry individual/batch Lodestone lookup and confirm the profile is public.
 - If `/playtime` is unavailable at login, increase the post-unlock delay or refresh manually after login.
-- If the language is wrong, choose English or 日本語 in Settings; that choice persists.
+- If the language is wrong, choose one of the seven named languages in Settings; that choice persists.
 - For a missing configuration folder, confirm it exists in this Windows/FFXIV installation.
 
 ## Uninstall and remove data
@@ -83,7 +90,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The shared repository consumes `artifacts\CharacterArchive-0.5.1.0.zip` and `distribution\CharacterArchive.metadata.json`. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The next unpublished package is `artifacts\CharacterArchive-0.6.0.0.zip`; its final release URLs must be injected during publication. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 

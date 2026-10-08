@@ -5,12 +5,23 @@ using CharacterArchive.Services;
 
 var failures = new List<string>();
 
-AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(null, "ja", false), "初回Dalamud日本語");
-AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(null, "en", true), "初回ゲーム日本語");
-AssertEqual(DisplayLanguage.English, LanguageResolver.Initialize(null, null, false), "初回検出不能は英語fallback");
-AssertEqual(DisplayLanguage.English, LanguageResolver.Initialize(DisplayLanguage.English, "ja", true), "保存済みEnglish維持");
-AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(DisplayLanguage.Japanese, "en", false), "保存済み日本語維持");
-AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize((DisplayLanguage)0, "ja", false), "途中版Auto値は初回検出へ移行");
+AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(null, "Japanese", "en"), "ゲーム日本語優先");
+AssertEqual(DisplayLanguage.German, LanguageResolver.Initialize(null, "de-DE", "ja"), "ゲームGerman優先");
+AssertEqual(DisplayLanguage.French, LanguageResolver.Initialize(null, null, "fr-FR"), "Dalamud French fallback");
+AssertEqual(DisplayLanguage.Korean, LanguageResolver.Initialize(null, null, "ko_KR"), "Dalamud Korean fallback");
+AssertEqual(DisplayLanguage.SimplifiedChinese, LanguageResolver.Initialize(null, "zh-CN", "en"), "簡体字地域コード");
+AssertEqual(DisplayLanguage.TraditionalChinese, LanguageResolver.Initialize(null, "zh-Hant", "en"), "繁体字明示コード");
+AssertEqual(DisplayLanguage.English, LanguageResolver.Initialize(null, "zh", "unknown"), "曖昧zhはEnglish fallback");
+AssertEqual(DisplayLanguage.English, LanguageResolver.Initialize(null, null, null), "検出不能はEnglish fallback");
+AssertEqual(DisplayLanguage.English, LanguageResolver.Initialize(DisplayLanguage.English, "ja", "ja"), "保存済みEnglish維持");
+AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(DisplayLanguage.Japanese, "en", "en"), "保存済み日本語維持");
+AssertEqual(DisplayLanguage.Korean, LanguageResolver.Initialize(DisplayLanguage.Korean, "en", "en"), "保存済み韓国語維持");
+AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize((DisplayLanguage)0, "ja", "en"), "旧Auto値は再解決");
+foreach (var savedLanguage in Enum.GetValues<DisplayLanguage>())
+    AssertEqual(savedLanguage, LanguageResolver.Initialize(savedLanguage, "en", "ja"), $"保存済み言語維持:{savedLanguage}");
+AssertEqual(1, (int)DisplayLanguage.English, "旧English enum番号維持");
+AssertEqual(2, (int)DisplayLanguage.Japanese, "旧日本語enum番号維持");
+AssertEqual(0, LocalizationCatalog.Validate().Count, "7言語リソースの空値・書式引数整合");
 
 AssertEqual("FFXIV_CHR0123456789ABCDEF", CharacterFileLocator.GetFolderName(0x0123456789ABCDEF),
     "設定フォルダ名");
@@ -28,6 +39,9 @@ AssertEqual(
 
 AssertEqual("12日 3時間 45分", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.GameStyle), "ptime元表示");
 AssertEqual("12d 3h 45m", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.GameStyle, ResolvedLanguage.English), "ptime英語表示");
+AssertEqual("12 T 3 Std. 45 Min.", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.GameStyle, ResolvedLanguage.German), "ptimeドイツ語表示");
+AssertEqual("12일 3시간 45분", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.GameStyle, ResolvedLanguage.Korean), "ptime韓国語表示");
+AssertEqual("12天 3小时 45分钟", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.GameStyle, ResolvedLanguage.SimplifiedChinese), "ptime簡体字表示");
 AssertEqual("00291:45:00", PlayTimeFormatter.Format(17_505, PlayTimeDisplayMode.TotalHours), "ptime時間表示");
 AssertEqual("未取得", PlayTimeFormatter.Format(null, PlayTimeDisplayMode.TotalHours), "ptime未取得");
 
@@ -54,10 +68,14 @@ try
     CsvExporter.ExportToPath([], chosenPath);
     Assert(File.Exists(chosenPath), "任意パスへのCSV出力");
 
-    var englishPath = Path.Combine(testDirectory, "english.csv");
-    CsvExporter.ExportToPath([], englishPath, ResolvedLanguage.English);
-    Assert(File.ReadAllText(englishPath, Encoding.UTF8)
-        .StartsWith("Character Name,Server,Lodestone ID,Configuration Folder", StringComparison.Ordinal), "CSV英語列名");
+    foreach (var language in Enum.GetValues<ResolvedLanguage>())
+    {
+        var localizedPath = Path.Combine(testDirectory, $"schema-{language}.csv");
+        CsvExporter.ExportToPath([], localizedPath, language);
+        Assert(File.ReadAllText(localizedPath, Encoding.UTF8)
+            .StartsWith("キャラクター名,サーバー名,ロドストID,設定ファイル名", StringComparison.Ordinal),
+            $"CSVスキーマは言語非依存:{language}");
+    }
 }
 finally
 {

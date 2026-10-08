@@ -10,7 +10,6 @@ using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System.Runtime.InteropServices;
-using Dalamud.Game;
 
 namespace CharacterArchive;
 
@@ -49,12 +48,12 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         var initializedLanguage = LanguageResolver.Initialize(
             Configuration.DisplayLanguage,
-            PluginInterface.UiLanguage,
-            ClientState.ClientLanguage == ClientLanguage.Japanese);
-        if (Configuration.Version < 3 || Configuration.DisplayLanguage != initializedLanguage)
+            ClientState.ClientLanguage.ToString(),
+            PluginInterface.UiLanguage);
+        if (Configuration.Version < 4 || Configuration.DisplayLanguage != initializedLanguage)
         {
             Configuration.DisplayLanguage = initializedLanguage;
-            Configuration.Version = 3;
+            Configuration.Version = 4;
             PluginInterface.SavePluginConfig(Configuration);
         }
         Configuration.PlayTimeCommandDelaySeconds = Math.Clamp(Configuration.PlayTimeCommandDelaySeconds, 1, 60);
@@ -283,9 +282,9 @@ public sealed class Plugin : IDalamudPlugin
             for (var index = 0; index < targets.Length; index++)
             {
                 var record = targets[index];
-                mainWindow.SetBatchLookupStatus(Localizer.Text(
-                    $"Batch lookup {index + 1}/{targets.Length}: {record.CharacterName}",
-                    $"まとめて検索中 {index + 1}/{targets.Length}: {record.CharacterName}"));
+                mainWindow.SetBatchLookupStatus(Localizer.Format(
+                    "Batch lookup {0}/{1}: {2}",
+                    "まとめて検索中 {0}/{1}: {2}", index + 1, targets.Length, record.CharacterName));
                 await LookupLodestoneIdAsync(record);
 
                 if (index + 1 < targets.Length)
@@ -294,7 +293,7 @@ public sealed class Plugin : IDalamudPlugin
 
             mainWindow.SetBatchLookupStatus(targets.Length == 0
                 ? Localizer.Text("No characters require lookup", "検索対象はありません")
-                : Localizer.Text($"Batch lookup completed: {targets.Length}", $"まとめて検索完了: {targets.Length}件"));
+                : Localizer.Format("Batch lookup completed: {0}", "まとめて検索完了: {0}件", targets.Length));
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {

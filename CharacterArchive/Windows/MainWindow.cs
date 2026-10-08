@@ -85,7 +85,7 @@ public sealed class MainWindow : Window
 
     private void DrawHeader(int count)
     {
-        ImGui.Text(T($"Saved characters: {count}", $"保存済みキャラクター: {count}"));
+        ImGui.Text(F("Saved characters: {0}", "保存済みキャラクター: {0}", count));
         ImGui.SameLine();
         if (ImGui.Button(T("Refresh Current Character", "現在のキャラクターを再取得")))
             plugin.CaptureCurrentCharacter();
@@ -106,7 +106,7 @@ public sealed class MainWindow : Window
     {
         if (records.Count == 0)
         {
-            ImGui.TextDisabled(T(
+            DisabledWrapped(T(
                 "Log in with a character to add information here.",
                 "キャラクターでログインすると、ここに情報が追加されます。"));
             return;
@@ -150,7 +150,7 @@ public sealed class MainWindow : Window
     {
         if (records.Count == 0)
         {
-            ImGui.TextDisabled(T("No information is available.", "表示できる情報がありません。"));
+            DisabledWrapped(T("No information is available.", "表示できる情報がありません。"));
             return;
         }
 
@@ -257,7 +257,7 @@ public sealed class MainWindow : Window
                 true);
         }
         ImGui.SameLine();
-        ImGui.TextDisabled(T(
+        DisabledWrapped(T(
             "(Copies the file path to the clipboard after export)",
             "（出力後、ファイルパスをクリップボードへコピー）"));
     }
@@ -270,7 +270,7 @@ public sealed class MainWindow : Window
         var autoPlayTime = plugin.Configuration.AutoRequestPlayTimeOnLogin;
         if (ImGui.Checkbox(T("Automatically acquire ptime on login", "ログイン時にptimeを自動取得する"), ref autoPlayTime))
             plugin.SetAutoRequestPlayTimeOnLogin(autoPlayTime);
-        ImGui.TextDisabled(T(
+        DisabledWrapped(T(
             "When enabled, runs the standard /playtime command once after login (default: OFF).",
             "有効時のみ、ログイン後にゲーム標準の /playtime を1回実行します（既定: OFF）。"));
 
@@ -287,7 +287,7 @@ public sealed class MainWindow : Window
             plugin.Configuration.PlayTimeDisplayMode = PlayTimeDisplayMode.TotalHours;
             plugin.Repository.SaveSettings();
         }
-        ImGui.TextDisabled(T(
+        DisabledWrapped(T(
             "Manual ptime requests are also limited to one every 10 seconds.",
             "手動のptime再取得も10秒以内の連続実行を抑止します。"));
 
@@ -298,7 +298,7 @@ public sealed class MainWindow : Window
             plugin.Configuration.PlayTimeCommandDelaySeconds = Math.Clamp(commandDelay, 1, 60);
             plugin.Repository.SaveSettings();
         }
-        ImGui.TextDisabled(T(
+        DisabledWrapped(T(
             "1-60 seconds. Waits this long after the game allows text commands (default: 1 second).",
             "1～60秒。ゲーム側の禁止解除を検出してから、この秒数だけ待って実行します（デフォルト: 1秒）。"));
 
@@ -309,7 +309,7 @@ public sealed class MainWindow : Window
             plugin.Configuration.AutoLookupLodestoneId = autoLookup;
             plugin.Repository.SaveSettings();
         }
-        ImGui.TextDisabled(T(
+        DisabledWrapped(T(
             "When enabled, sends the character name and home world to the official Lodestone search.",
             "有効にすると、キャラクター名とホームワールドを公式Lodestoneへ送信して検索します。"));
 
@@ -357,7 +357,7 @@ public sealed class MainWindow : Window
             "このプラグインが役に立った場合、Ko-fiから任意で開発を支援できます。支援の有無で機能が変わることはありません。"));
         ImGui.Spacing();
         ImGui.TextUnformatted(T("Recipient: Roxyz0501", "受取人: Roxyz0501"));
-        ImGui.TextUnformatted(T($"Support URL: {KoFiUrl}", $"支援先: {KoFiUrl}"));
+        ImGui.TextUnformatted(F("Support URL: {0}", "支援先: {0}", KoFiUrl));
         ImGui.Spacing();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.88f, 0.38f, 0.06f, 1f));
@@ -385,24 +385,24 @@ public sealed class MainWindow : Window
     {
         ImGui.Text(T("Display language", "表示言語"));
         var selected = plugin.Configuration.DisplayLanguage ?? DisplayLanguage.English;
-        var preview = selected switch
-        {
-            DisplayLanguage.English => "English",
-            DisplayLanguage.Japanese => "日本語",
-            _ => "English",
-        };
+        var preview = LanguageLabel(selected);
 
         ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
         if (ImGui.BeginCombo("##DisplayLanguage", preview))
         {
             DrawLanguageOption(DisplayLanguage.English, "English");
             DrawLanguageOption(DisplayLanguage.Japanese, "日本語");
+            DrawLanguageOption(DisplayLanguage.German, "Deutsch");
+            DrawLanguageOption(DisplayLanguage.French, "Français");
+            DrawLanguageOption(DisplayLanguage.Korean, "한국어");
+            DrawLanguageOption(DisplayLanguage.SimplifiedChinese, "简体中文");
+            DrawLanguageOption(DisplayLanguage.TraditionalChinese, "繁體中文");
             ImGui.EndCombo();
         }
 
-        ImGui.TextDisabled(T(
-            "The language is selected from Dalamud/game settings only on first launch, then remains fixed here.",
-            "初回起動時のみDalamud／ゲーム設定から選択し、その後はここで選んだ言語に固定されます。"));
+        DisabledWrapped(T(
+            "The language is selected from game/Dalamud settings only on first launch, then remains fixed here.",
+            "初回起動時のみゲーム／Dalamud設定から選択し、その後はここで選んだ言語に固定されます。"));
     }
 
     private void DrawLanguageOption(DisplayLanguage language, string label)
@@ -412,6 +412,9 @@ public sealed class MainWindow : Window
         {
             plugin.Configuration.DisplayLanguage = language;
             plugin.Repository.SaveSettings();
+            statusMessage = string.Empty;
+            batchLookupStatus = string.Empty;
+            lookupResults.Clear();
         }
 
         if (selected)
@@ -422,6 +425,13 @@ public sealed class MainWindow : Window
     {
         ImGui.TableNextColumn();
         ImGui.TextUnformatted(EmptyAsDash(value));
+    }
+
+    private static void DisabledWrapped(string value)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+        ImGui.TextWrapped(value);
+        ImGui.PopStyleColor();
     }
 
     private static void Detail(string label, string value)
@@ -452,7 +462,7 @@ public sealed class MainWindow : Window
     {
         if (record.Jobs.Count == 0)
         {
-            ImGui.TextDisabled(T(
+            DisabledWrapped(T(
                 "Job information updates automatically after it is loaded into memory.",
                 "ジョブ情報はメモリへ読み込まれた後に自動更新されます。"));
             return;
@@ -471,7 +481,7 @@ public sealed class MainWindow : Window
         {
             ImGui.TableNextRow();
             Cell(job.RowId == record.CurrentClassJobId
-                ? T($"{job.Name} (Current)", $"{job.Name}（カレント）")
+                ? F("{0} (Current)", "{0}（カレント）", job.Name)
                 : job.Name);
             Cell(job.Abbreviation);
             Cell(job.Level > 0 ? job.Level.ToString() : T("Locked", "未開放"));
@@ -493,7 +503,7 @@ public sealed class MainWindow : Window
                 plugin.Configuration.CsvExportDirectory = directory;
                 plugin.Repository.SaveSettings();
             }
-            statusMessage = T($"CSV export completed: {path}", $"CSV出力完了: {path}");
+            statusMessage = F("CSV export completed: {0}", "CSV出力完了: {0}", path);
             ImGui.SetClipboardText(path);
         }
         catch (Exception exception)
@@ -506,4 +516,18 @@ public sealed class MainWindow : Window
     }
 
     private string T(string english, string japanese) => plugin.Localizer.Text(english, japanese);
+
+    private string F(string english, string japanese, params object[] arguments) =>
+        plugin.Localizer.Format(english, japanese, arguments);
+
+    private static string LanguageLabel(DisplayLanguage language) => language switch
+    {
+        DisplayLanguage.Japanese => "日本語",
+        DisplayLanguage.German => "Deutsch",
+        DisplayLanguage.French => "Français",
+        DisplayLanguage.Korean => "한국어",
+        DisplayLanguage.SimplifiedChinese => "简体中文",
+        DisplayLanguage.TraditionalChinese => "繁體中文",
+        _ => "English",
+    };
 }

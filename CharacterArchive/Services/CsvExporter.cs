@@ -26,9 +26,9 @@ public static class CsvExporter
         if (!string.IsNullOrWhiteSpace(directory))
             Directory.CreateDirectory(directory);
 
-        var header = language == ResolvedLanguage.Japanese
-            ? "キャラクター名,サーバー名,ロドストID,設定ファイル名"
-            : "Character Name,Server,Lodestone ID,Configuration Folder";
+        // This is an exported data schema, not UI text. Keep it stable across UI languages.
+        _ = language;
+        const string header = "キャラクター名,サーバー名,ロドストID,設定ファイル名";
         var lines = new List<string> { header };
         lines.AddRange(records
             .OrderBy(record => record.HomeWorld, StringComparer.OrdinalIgnoreCase)

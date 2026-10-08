@@ -15,5 +15,6 @@
     <Compile Include="..\CharacterArchive\Models\PlayTimeDisplayMode.cs" Link="Models\PlayTimeDisplayMode.cs" />
     <Compile Include="..\CharacterArchive\Models\DisplayLanguage.cs" Link="Models\DisplayLanguage.cs" />
     <Compile Include="..\CharacterArchive\Services\LanguageResolver.cs" Link="Services\LanguageResolver.cs" />
+    <Compile Include="..\CharacterArchive\Services\LocalizationCatalog.cs" Link="Services\LocalizationCatalog.cs" />
   </ItemGroup>
 </Project>

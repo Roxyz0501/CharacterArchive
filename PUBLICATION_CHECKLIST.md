@@ -6,11 +6,11 @@
 
 - InternalName: `CharacterArchive`
 - Name: `Character Archive`
-- AssemblyVersion: `0.5.1.0`
+- AssemblyVersion: `0.6.0.0`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
 - 必須依存プラグイン: なし
-- Release ZIP名: `CharacterArchive-0.5.1.0.zip`
+- Release ZIP名: `CharacterArchive-0.6.0.0.zip`
 
 Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは共通リポジトリ統合時に実在URLを注入します。
 
@@ -26,9 +26,11 @@ Punchline、Description、Tagsを含む機械可読案は`distribution/Character
 
 - [ ] プラグインのロード、リロード、アンロードで例外が発生しない
 - [ ] `/chararchive`でUIを開閉できる
-- [ ] 初回起動時、日本語クライアントでは日本語、それ以外・検出不能ではEnglishが選ばれて保存される
-- [ ] 設定の言語選択肢がEnglish／日本語だけで、保存後の再起動では自動検出により上書きされない
-- [ ] 全タブ、設定、通知、エラー、ツールチップ、CSV列名が選択言語へ切り替わる
+- [ ] 初回起動時、ゲーム言語→Dalamud UI言語→Englishの順で対応言語が選ばれて保存される
+- [ ] 設定の言語選択肢が日本語／English／Deutsch／Français／한국어／简体中文／繁體中文の7つで、Autoがない
+- [ ] 保存後の再起動とキャラクター切替で手動選択が上書きされない
+- [ ] 全タブ、設定、通知、エラー、ツールチップが7言語へ即時切り替わり、CSVの日本語4列スキーマは言語変更で変化しない
+- [ ] 韓国語・簡体字・繁体字・欧文アクセントのグリフと、ドイツ語・フランス語長文の折返しを実ゲームで確認する
 - [ ] ログイン時のキャラクター情報と全ジョブが正しい
 - [ ] ptime自動取得が既定OFFである
 - [ ] ptime自動取得を有効にした場合、ログインごとに1回だけ標準コマンドが実行される
@@ -50,7 +52,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-`scripts/pack-release.ps1`は`artifacts/CharacterArchive-0.5.1.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。
+`scripts/pack-release.ps1`は`artifacts/CharacterArchive-0.6.0.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースはDLLへ埋め込まれます。
 
 - `CharacterArchive.dll`
 - `CharacterArchive.json`

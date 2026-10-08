@@ -10,7 +10,16 @@ public static class PlayTimeFormatter
         ResolvedLanguage language = ResolvedLanguage.Japanese)
     {
         if (totalMinutes is null)
-            return language == ResolvedLanguage.Japanese ? "未取得" : "Not acquired";
+            return language switch
+            {
+                ResolvedLanguage.Japanese => "未取得",
+                ResolvedLanguage.German => "Nicht erfasst",
+                ResolvedLanguage.French => "Non acquis",
+                ResolvedLanguage.Korean => "미취득",
+                ResolvedLanguage.SimplifiedChinese => "未获取",
+                ResolvedLanguage.TraditionalChinese => "未取得",
+                _ => "Not acquired",
+            };
 
         var minutes = totalMinutes.Value;
         return mode == PlayTimeDisplayMode.TotalHours
@@ -23,8 +32,15 @@ public static class PlayTimeFormatter
         var days = totalMinutes / (24 * 60);
         var hours = totalMinutes / 60 % 24;
         var minutes = totalMinutes % 60;
-        return language == ResolvedLanguage.Japanese
-            ? $"{days}日 {hours}時間 {minutes}分"
-            : $"{days}d {hours}h {minutes}m";
+        return language switch
+        {
+            ResolvedLanguage.Japanese => $"{days}日 {hours}時間 {minutes}分",
+            ResolvedLanguage.German => $"{days} T {hours} Std. {minutes} Min.",
+            ResolvedLanguage.French => $"{days} j {hours} h {minutes} min",
+            ResolvedLanguage.Korean => $"{days}일 {hours}시간 {minutes}분",
+            ResolvedLanguage.SimplifiedChinese => $"{days}天 {hours}小时 {minutes}分钟",
+            ResolvedLanguage.TraditionalChinese => $"{days}天 {hours}小時 {minutes}分鐘",
+            _ => $"{days}d {hours}h {minutes}m",
+        };
     }
 }
