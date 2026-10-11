@@ -1,5 +1,17 @@
 # Character Archive publication state
 
+## 2026-10-11 version 1.0.0.0
+
+- Source: https://github.com/Roxyz0501/CharacterArchive
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.0.0.0
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.0/CharacterArchive-1.0.0.0.zip
+- SHA-256: `C22A3EED447643711FC93EC50A4051398DF2E0E65588A8092A542047A6ACB029`
+- Copied the canonical `StandardPluginTabs` implementation byte-for-byte and moved the global selector from Settings into the localized `Language settings###LanguageSettings` tab.
+- Standardized `Support###Support` colors, spacing, button sizing, recipient, URL, and click-only navigation against the canonical implementation.
+- Seven-language selection order, initial detection, migration, immediate switching, and persistence remain intact.
+- Clean Release build completed with zero warnings/errors and all core tests passed. The package contains only the DLL, manifest, license, and third-party notices.
+- In-game tab rendering, language persistence after an actual game restart, CJK font coverage, and long German/French layouts remain unverified and are disclosed in the release notes.
+
 ## 2026-10-08 version 0.6.0.0
 
 - Source: https://github.com/Roxyz0501/CharacterArchive

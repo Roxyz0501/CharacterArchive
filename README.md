@@ -23,11 +23,15 @@ Add that URL under Dalamud Settings → Experimental → Custom Plugin Repositor
 
 ## Usage and command
 
-Log into a character to add or update it. Use `/chararchive` to open or close the window. Overview, jobs, character-file mapping, settings, and support are separated into tabs. Lodestone lookup, playtime refresh, and CSV export run only through their controls or explicit settings.
+Log into a character to add or update it. Use `/chararchive` to open or close the window. Overview, jobs, character-file mapping, settings, language settings, and support are separated into tabs. Lodestone lookup, playtime refresh, and CSV export run only through their controls or explicit settings.
+
+## Language settings tab
+
+- Choose 日本語, English, Deutsch, Français, 한국어, 简体中文, or 繁體中文 from the independent **Language settings** tab. There is no Auto setting.
+- The selector follows the shared Roxyz0501 tab layout and applies changes immediately.
 
 ## Settings
 
-- **Language:** Choose 日本語, English, Deutsch, Français, 한국어, 简体中文, or 繁體中文. There is no Auto setting.
 - **Automatically acquire ptime on login:** Off by default. When enabled, runs standard `/playtime` once per login after commands become available.
 - **Delay after commands become available:** 1–60 seconds; default 1 second.
 - **Playtime display:** Game-style or total-hours format.
@@ -74,7 +78,7 @@ The plugin itself does not contact Ko-fi. The browser opens `https://ko-fi.com/r
 
 - For a missing face image, retry individual/batch Lodestone lookup and confirm the profile is public.
 - If `/playtime` is unavailable at login, increase the post-unlock delay or refresh manually after login.
-- If the language is wrong, choose one of the seven named languages in Settings; that choice persists.
+- If the language is wrong, choose one of the seven named languages in the Language settings tab; that choice persists.
 - For a missing configuration folder, confirm it exists in this Windows/FFXIV installation.
 
 ## Uninstall and remove data
@@ -90,7 +94,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The next unpublished package is `artifacts\CharacterArchive-0.6.0.0.zip`; its final release URLs must be injected during publication. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.0.0.0.zip`. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 

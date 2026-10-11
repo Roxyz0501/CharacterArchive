@@ -23,11 +23,15 @@ Dalamud設定 → Experimental → Custom Plugin Repositoriesへ上記URLを追�
 
 ## 利用方法・コマンド
 
-キャラクターへログインすると情報が追加・更新されます。`/chararchive`でメインUIを開閉します。概要、ジョブ、キャラファイル紐づけ、設定、支援をタブで表示し、Lodestone検索、ptime再取得、CSV出力は対応する操作または明示設定時だけ実行します。
+キャラクターへログインすると情報が追加・更新されます。`/chararchive`でメインUIを開閉します。概要、ジョブ、キャラファイル紐づけ、設定、言語設定、支援を独立したタブで表示し、Lodestone検索、ptime再取得、CSV出力は対応する操作または明示設定時だけ実行します。
+
+## 言語設定タブ
+
+- 独立した**言語設定**タブで、日本語、English、Deutsch、Français、한국어、简体中文、繁體中文から選択します。Auto設定はありません。
+- Roxyz0501共通タブの配置を使用し、変更は即時反映されます。
 
 ## 設定
 
-- **言語：** 日本語、English、Deutsch、Français、한국어、简体中文、繁體中文から選択します。Auto設定はありません。
 - **ログイン時にptimeを自動取得する：** 既定OFF。有効時だけコマンド解禁後、ログインごとに標準`/playtime`を1回実行します。
 - **コマンド使用可能後の待機秒数：** 1～60秒、既定1秒。
 - **プレイ時間の表示形式：** ゲーム風表示または累計時間表示。
@@ -74,7 +78,7 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 
 - 顔画像がない場合は個別／まとめ検索を再実行し、公開プロフィールを確認してください。
 - ログイン直後に`/playtime`が使えない場合は待機秒数を増やすか、ログイン完了後に手動再取得してください。
-- 表示言語が意図と異なる場合は設定で7言語のいずれかを選択してください。以後その値を維持します。
+- 表示言語が意図と異なる場合は言語設定タブで7言語のいずれかを選択してください。以後その値を維持します。
 - 設定フォルダがない場合は、そのWindows／FFXIV環境に対象キャラクターのフォルダが存在するか確認してください。
 
 ## アンインストール・データ削除
@@ -90,7 +94,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-次の未公開成果物は`artifacts\CharacterArchive-0.6.0.0.zip`です。公開時に最終Release URLをメタデータへ設定してください。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.0.0.0.zip`です。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 

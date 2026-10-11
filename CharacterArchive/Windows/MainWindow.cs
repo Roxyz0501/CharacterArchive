@@ -8,12 +8,12 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
+using Roxyz0501.Dalamud.CommonUi;
 
 namespace CharacterArchive.Windows;
 
 public sealed class MainWindow : Window
 {
-    private const string KoFiUrl = "https://ko-fi.com/roxyz0501";
     private readonly Plugin plugin;
     private readonly ConcurrentDictionary<ulong, string> lookupResults = new();
     private readonly FileDialogManager fileDialogManager = new();
@@ -64,12 +64,15 @@ public sealed class MainWindow : Window
             ImGui.EndTabItem();
         }
 
-        ImGui.PushStyleColor(ImGuiCol.Tab, new Vector4(0.45f, 0.22f, 0.03f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.TabHovered, new Vector4(0.85f, 0.42f, 0.06f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.TabActive, new Vector4(0.95f, 0.55f, 0.10f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.96f, 0.86f, 1f));
-        var supportTabOpen = ImGui.BeginTabItem(T("★ Support", "★ 支援"));
-        ImGui.PopStyleColor(4);
+        if (ImGui.BeginTabItem($"{T("Language settings", "言語設定")}###LanguageSettings"))
+        {
+            DrawLanguageSettings();
+            ImGui.EndTabItem();
+        }
+
+        StandardPluginTabs.PushSupportTabStyle();
+        var supportTabOpen = ImGui.BeginTabItem($"{T("Support", "支援")}###Support");
+        StandardPluginTabs.PopSupportTabStyle();
         if (supportTabOpen)
         {
             DrawSupport();
@@ -264,9 +267,6 @@ public sealed class MainWindow : Window
 
     private void DrawSettings()
     {
-        DrawLanguageSetting();
-        ImGui.Separator();
-
         var autoPlayTime = plugin.Configuration.AutoRequestPlayTimeOnLogin;
         if (ImGui.Checkbox(T("Automatically acquire ptime on login", "ログイン時にptimeを自動取得する"), ref autoPlayTime))
             plugin.SetAutoRequestPlayTimeOnLogin(autoPlayTime);
@@ -349,76 +349,32 @@ public sealed class MainWindow : Window
 
     private void DrawSupport()
     {
-        ImGui.Spacing();
-        ImGui.TextColored(new Vector4(1f, 0.72f, 0.20f, 1f), T("Support Roxyz0501's Development", "Roxyz0501の開発を支援"));
-        ImGui.Spacing();
-        ImGui.TextWrapped(T(
-            "If this plugin is useful, you can optionally support development through Ko-fi. All features remain available without support.",
-            "このプラグインが役に立った場合、Ko-fiから任意で開発を支援できます。支援の有無で機能が変わることはありません。"));
-        ImGui.Spacing();
-        ImGui.TextUnformatted(T("Recipient: Roxyz0501", "受取人: Roxyz0501"));
-        ImGui.TextUnformatted(F("Support URL: {0}", "支援先: {0}", KoFiUrl));
-        ImGui.Spacing();
+        StandardPluginTabs.DrawSupportContent(
+            T("Support Roxyz0501's Development", "Roxyz0501の開発を支援"),
+            T(
+                "If this plugin is useful, you can optionally support development through Ko-fi. All features remain available without support.",
+                "このプラグインが役に立った場合、Ko-fiから任意で開発を支援できます。支援の有無で機能が変わることはありません。"),
+            T("Recipient: Roxyz0501", "受取人: Roxyz0501"),
+            T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援"));
+    }
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.88f, 0.38f, 0.06f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(1f, 0.52f, 0.10f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.72f, 0.29f, 0.03f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
-        var openKoFi = ImGui.Button(T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援"), new Vector2(320, 48) * ImGuiHelpers.GlobalScale);
-        ImGui.PopStyleColor(4);
-
-        if (!openKoFi)
+    private void DrawLanguageSettings()
+    {
+        var selected = plugin.Configuration.DisplayLanguage ?? DisplayLanguage.English;
+        var changedCode = StandardPluginTabs.DrawLanguageSelector(
+            T("Display language", "表示言語"),
+            T(
+            "The language is selected from game/Dalamud settings only on first launch, then remains fixed here.",
+            "初回起動時のみゲーム／Dalamud設定から選択し、その後はここで選んだ言語に固定されます。"),
+            ToLanguageCode(selected));
+        if (changedCode is null)
             return;
 
-        try
-        {
-            Dalamud.Utility.Util.OpenLink(KoFiUrl);
-        }
-        catch (Exception exception)
-        {
-            Plugin.Log.Warning(exception, T("Could not open the Ko-fi page.", "Ko-fiページを開けませんでした"));
-            statusMessage = T("Could not open the Ko-fi page.", "Ko-fiページを開けませんでした。");
-        }
-    }
-
-    private void DrawLanguageSetting()
-    {
-        ImGui.Text(T("Display language", "表示言語"));
-        var selected = plugin.Configuration.DisplayLanguage ?? DisplayLanguage.English;
-        var preview = LanguageLabel(selected);
-
-        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("##DisplayLanguage", preview))
-        {
-            DrawLanguageOption(DisplayLanguage.English, "English");
-            DrawLanguageOption(DisplayLanguage.Japanese, "日本語");
-            DrawLanguageOption(DisplayLanguage.German, "Deutsch");
-            DrawLanguageOption(DisplayLanguage.French, "Français");
-            DrawLanguageOption(DisplayLanguage.Korean, "한국어");
-            DrawLanguageOption(DisplayLanguage.SimplifiedChinese, "简体中文");
-            DrawLanguageOption(DisplayLanguage.TraditionalChinese, "繁體中文");
-            ImGui.EndCombo();
-        }
-
-        DisabledWrapped(T(
-            "The language is selected from game/Dalamud settings only on first launch, then remains fixed here.",
-            "初回起動時のみゲーム／Dalamud設定から選択し、その後はここで選んだ言語に固定されます。"));
-    }
-
-    private void DrawLanguageOption(DisplayLanguage language, string label)
-    {
-        var selected = plugin.Configuration.DisplayLanguage == language;
-        if (ImGui.Selectable($"{label}##Language{language}", selected))
-        {
-            plugin.Configuration.DisplayLanguage = language;
-            plugin.Repository.SaveSettings();
-            statusMessage = string.Empty;
-            batchLookupStatus = string.Empty;
-            lookupResults.Clear();
-        }
-
-        if (selected)
-            ImGui.SetItemDefaultFocus();
+        plugin.Configuration.DisplayLanguage = FromLanguageCode(changedCode);
+        plugin.Repository.SaveSettings();
+        statusMessage = string.Empty;
+        batchLookupStatus = string.Empty;
+        lookupResults.Clear();
     }
 
     private static void Cell(string value)
@@ -520,14 +476,25 @@ public sealed class MainWindow : Window
     private string F(string english, string japanese, params object[] arguments) =>
         plugin.Localizer.Format(english, japanese, arguments);
 
-    private static string LanguageLabel(DisplayLanguage language) => language switch
+    private static string ToLanguageCode(DisplayLanguage language) => language switch
     {
-        DisplayLanguage.Japanese => "日本語",
-        DisplayLanguage.German => "Deutsch",
-        DisplayLanguage.French => "Français",
-        DisplayLanguage.Korean => "한국어",
-        DisplayLanguage.SimplifiedChinese => "简体中文",
-        DisplayLanguage.TraditionalChinese => "繁體中文",
-        _ => "English",
+        DisplayLanguage.Japanese => "ja",
+        DisplayLanguage.German => "de",
+        DisplayLanguage.French => "fr",
+        DisplayLanguage.Korean => "ko",
+        DisplayLanguage.SimplifiedChinese => "zh-Hans",
+        DisplayLanguage.TraditionalChinese => "zh-Hant",
+        _ => "en",
+    };
+
+    private static DisplayLanguage FromLanguageCode(string code) => code switch
+    {
+        "ja" => DisplayLanguage.Japanese,
+        "de" => DisplayLanguage.German,
+        "fr" => DisplayLanguage.French,
+        "ko" => DisplayLanguage.Korean,
+        "zh-Hans" => DisplayLanguage.SimplifiedChinese,
+        "zh-Hant" => DisplayLanguage.TraditionalChinese,
+        _ => DisplayLanguage.English,
     };
 }
