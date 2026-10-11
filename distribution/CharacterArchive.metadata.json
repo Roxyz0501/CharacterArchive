@@ -2,15 +2,15 @@
   "Author": "Roxyz0501",
   "Name": "Character Archive",
   "InternalName": "CharacterArchive",
-  "AssemblyVersion": "1.0.0.0",
+  "AssemblyVersion": "1.0.0.1",
   "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
   "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/CharacterArchive/main/CharacterArchive/images/icon.png",
-  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.0/CharacterArchive-1.0.0.0.zip",
-  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.0/CharacterArchive-1.0.0.0.zip",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.1/CharacterArchive-1.0.0.1.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.1/CharacterArchive-1.0.0.1.zip",
   "Tags": [
     "character",
     "config",
@@ -19,6 +19,6 @@
     "playtime"
   ],
   "RequiredPlugins": [],
-  "ReleaseArtifact": "CharacterArchive-1.0.0.0.zip",
-  "Changelog": "Moved language selection into the standardized Language settings tab and aligned the Support tab with the shared Roxyz0501 UI contract."
+  "ReleaseArtifact": "CharacterArchive-1.0.0.1.zip",
+  "Changelog": "Uses the canonical trailing-tab helper to enforce plugin tabs followed by Settings, Language settings, and Support."
 }

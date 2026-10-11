@@ -5,6 +5,19 @@ using CharacterArchive.Services;
 
 var failures = new List<string>();
 
+var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+var mainWindowSource = File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Windows", "MainWindow.cs"));
+var standardTabsSource = File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Windows", "StandardPluginTabs.cs"));
+AssertEqual(1, CountOccurrences(mainWindowSource, "StandardPluginTabs.DrawStandardTrailingTabs("), "共通末尾タブ呼び出しは1回");
+Assert(!mainWindowSource.Contains("ImGui.BeginTabItem(T(\"Settings\"", StringComparison.Ordinal), "Settingsを個別描画しない");
+Assert(mainWindowSource.IndexOf("Character File Mapping", StringComparison.Ordinal) <
+       mainWindowSource.IndexOf("StandardPluginTabs.DrawStandardTrailingTabs(", StringComparison.Ordinal), "固有タブの後に共通末尾タブを描画");
+var settingsTabIndex = standardTabsSource.IndexOf("settingsLabel}###{settingsStableId}", StringComparison.Ordinal);
+var languageTabIndex = standardTabsSource.IndexOf("languageSettingsLabel}###LanguageSettings", StringComparison.Ordinal);
+var supportTabIndex = standardTabsSource.IndexOf("supportLabel}###Support", StringComparison.Ordinal);
+Assert(settingsTabIndex >= 0 && settingsTabIndex < languageTabIndex && languageTabIndex < supportTabIndex,
+    "共通末尾タブ順はSettings→Language settings→Support");
+
 AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(null, "Japanese", "en"), "ゲーム日本語優先");
 AssertEqual(DisplayLanguage.German, LanguageResolver.Initialize(null, "de-DE", "ja"), "ゲームGerman優先");
 AssertEqual(DisplayLanguage.French, LanguageResolver.Initialize(null, null, "fr-FR"), "Dalamud French fallback");
@@ -103,4 +116,16 @@ void AssertEqual<T>(T expected, T actual, string name)
 {
     if (!EqualityComparer<T>.Default.Equals(expected, actual))
         failures.Add($"{name}: expected={expected}, actual={actual}");
+}
+
+int CountOccurrences(string text, string value)
+{
+    var count = 0;
+    var offset = 0;
+    while ((offset = text.IndexOf(value, offset, StringComparison.Ordinal)) >= 0)
+    {
+        count++;
+        offset += value.Length;
+    }
+    return count;
 }

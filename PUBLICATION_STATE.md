@@ -1,5 +1,16 @@
 # Character Archive publication state
 
+## 2026-10-12 version 1.0.0.1
+
+- Source: https://github.com/Roxyz0501/CharacterArchive
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.0.0.1
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.1/CharacterArchive-1.0.0.1.zip
+- SHA-256: `518C2810904FF248EF5FFF63E4E34EB2B28DA25EF6F9E4DCB806C59E0A0FC13C`
+- Updated the copied canonical `StandardPluginTabs` implementation and now calls `DrawStandardTrailingTabs` exactly once after every plugin-specific top-level tab.
+- The top-level right-edge order is fixed as Settings, Language settings, Support; no plugin-specific tab follows the shared group.
+- Added source-level regression checks for one helper call and the required tab order. Clean Release build completed with zero warnings/errors and all core tests passed.
+- In-game tab rendering and navigation remain unverified and are disclosed in the release notes.
+
 ## 2026-10-11 version 1.0.0.0
 
 - Source: https://github.com/Roxyz0501/CharacterArchive

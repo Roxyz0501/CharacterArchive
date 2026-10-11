@@ -58,26 +58,14 @@ public sealed class MainWindow : Window
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem(T("Settings", "設定")))
-        {
-            DrawSettings();
-            ImGui.EndTabItem();
-        }
-
-        if (ImGui.BeginTabItem($"{T("Language settings", "言語設定")}###LanguageSettings"))
-        {
-            DrawLanguageSettings();
-            ImGui.EndTabItem();
-        }
-
-        StandardPluginTabs.PushSupportTabStyle();
-        var supportTabOpen = ImGui.BeginTabItem($"{T("Support", "支援")}###Support");
-        StandardPluginTabs.PopSupportTabStyle();
-        if (supportTabOpen)
-        {
-            DrawSupport();
-            ImGui.EndTabItem();
-        }
+        StandardPluginTabs.DrawStandardTrailingTabs(
+            T("Settings", "設定"),
+            "Settings",
+            DrawSettings,
+            T("Language settings", "言語設定"),
+            DrawLanguageSettings,
+            T("Support", "支援"),
+            DrawSupport);
 
         ImGui.EndTabBar();
     }

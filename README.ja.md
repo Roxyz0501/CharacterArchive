@@ -94,7 +94,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.0.0.0.zip`です。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.0.0.1.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 

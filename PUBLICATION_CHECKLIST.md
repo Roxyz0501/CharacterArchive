@@ -6,11 +6,11 @@
 
 - InternalName: `CharacterArchive`
 - Name: `Character Archive`
-- AssemblyVersion: `1.0.0.0`
+- AssemblyVersion: `1.0.0.1`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
 - 必須依存プラグイン: なし
-- Release ZIP名: `CharacterArchive-1.0.0.0.zip`
+- Release ZIP名: `CharacterArchive-1.0.0.1.zip`
 
 Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは共通リポジトリ統合時に実在URLを注入します。
 
@@ -28,6 +28,7 @@ Punchline、Description、Tagsを含む機械可読案は`distribution/Character
 - [ ] `/chararchive`でUIを開閉できる
 - [ ] 初回起動時、ゲーム言語→Dalamud UI言語→Englishの順で対応言語が選ばれて保存される
 - [ ] 独立した`言語設定###LanguageSettings`タブに日本語／English／Deutsch／Français／한국어／简体中文／繁體中文の7つが正本順で並び、Settings内やAuto選択肢がない
+- [ ] `DrawStandardTrailingTabs`をトップレベルTabBarの最後に1回だけ呼び、固有タブ → 設定 → 言語設定 → 支援の順である
 - [ ] 保存後の再起動とキャラクター切替で手動選択が上書きされない
 - [ ] 全タブ、設定、通知、エラー、ツールチップが7言語へ即時切り替わり、CSVの日本語4列スキーマは言語変更で変化しない
 - [ ] 韓国語・簡体字・繁体字・欧文アクセントのグリフと、ドイツ語・フランス語長文の折返しを実ゲームで確認する
@@ -52,7 +53,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.0.0.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
+`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.0.0.1.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
 
 - `CharacterArchive.dll`
 - `CharacterArchive.json`
