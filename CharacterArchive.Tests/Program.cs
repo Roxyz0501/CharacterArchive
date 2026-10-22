@@ -96,6 +96,8 @@ finally
         Directory.Delete(testDirectory, recursive: true);
 }
 
+await PersistenceTests.Run(failures);
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

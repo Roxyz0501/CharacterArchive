@@ -6,6 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\CharacterArchive\Configuration.cs" Link="Configuration.cs" />
+    <Compile Include="..\CharacterArchive\Services\ConfigurationCodec.cs" Link="Services\ConfigurationCodec.cs" />
+    <Compile Include="..\CharacterArchive\Services\DeferredConfigurationStore.cs" Link="Services\DeferredConfigurationStore.cs" />
+    <Compile Include="..\CharacterArchive\Services\CaptureRetryState.cs" Link="Services\CaptureRetryState.cs" />
+    <Compile Include="..\CharacterArchive\Services\OwnedOperations.cs" Link="Services\OwnedOperations.cs" />
+    <Compile Include="..\CharacterArchive\Services\CharacterRepository.cs" Link="Services\CharacterRepository.cs" />
     <Compile Include="..\CharacterArchive\Models\CharacterRecord.cs" Link="Models\CharacterRecord.cs" />
     <Compile Include="..\CharacterArchive\Models\JobLevelRecord.cs" Link="Models\JobLevelRecord.cs" />
     <Compile Include="..\CharacterArchive\Services\CharacterFileLocator.cs" Link="Services\CharacterFileLocator.cs" />

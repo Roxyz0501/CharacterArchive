@@ -1,17 +1,16 @@
 using CharacterArchive.Models;
-using Dalamud.Plugin;
 
 namespace CharacterArchive.Services;
 
 public sealed class CharacterRepository
 {
     private readonly object syncRoot = new();
-    private readonly IDalamudPluginInterface pluginInterface;
+    private readonly Action markDirty;
     private readonly Configuration configuration;
 
-    public CharacterRepository(IDalamudPluginInterface pluginInterface, Configuration configuration)
+    public CharacterRepository(Action markDirty, Configuration configuration)
     {
-        this.pluginInterface = pluginInterface;
+        this.markDirty = markDirty;
         this.configuration = configuration;
     }
 
@@ -31,6 +30,9 @@ public sealed class CharacterRepository
         lock (syncRoot)
         {
             var existing = configuration.Characters.FirstOrDefault(record => record.ContentId == captured.ContentId);
+            if (!IsComplete(captured) || (existing is not null && existing.Jobs.Any(old =>
+                    old.Level > 0 && !captured.Jobs.Any(job => job.RowId == old.RowId && job.Level >= old.Level))))
+                throw new InvalidDataException("Character/job data is incomplete; the previous record was preserved.");
             if (existing is null)
             {
                 configuration.Characters.Add(captured);
@@ -45,6 +47,16 @@ public sealed class CharacterRepository
                 var playTimeMinutes = existing.PlayTimeMinutes;
                 var playTimeUpdatedAt = existing.PlayTimeUpdatedAt;
                 var firstSeen = existing.FirstSeenAt;
+                // Optional fields can temporarily be unavailable. Do not erase previously known values.
+                if (string.IsNullOrWhiteSpace(captured.Race)) captured.Race = existing.Race;
+                if (string.IsNullOrWhiteSpace(captured.Tribe)) captured.Tribe = existing.Tribe;
+                if (string.IsNullOrWhiteSpace(captured.GuardianDeity)) captured.GuardianDeity = existing.GuardianDeity;
+                if (string.IsNullOrWhiteSpace(captured.StartTown)) captured.StartTown = existing.StartTown;
+                if (string.IsNullOrWhiteSpace(captured.CurrentWorld))
+                {
+                    captured.CurrentWorld = existing.CurrentWorld;
+                    captured.CurrentWorldId = existing.CurrentWorldId;
+                }
                 Copy(captured, existing);
                 existing.LodestoneId = lodestoneId;
                 existing.ProfileImageUrl = profileImageUrl;
@@ -67,6 +79,8 @@ public sealed class CharacterRepository
             var record = configuration.Characters.FirstOrDefault(item => item.ContentId == contentId);
             if (record is null)
                 return;
+
+            if (record.PlayTimeMinutes == totalMinutes) return;
 
             record.PlayTimeMinutes = totalMinutes;
             record.PlayTimeUpdatedAt = DateTime.Now;
@@ -96,9 +110,12 @@ public sealed class CharacterRepository
                 return;
 
             record.LodestoneId = lodestoneId;
-            record.ProfileImageUrl = imageUrl;
-            record.ProfileImagePath = imagePath;
-            record.ProfileImageIsFace = !string.IsNullOrWhiteSpace(imagePath);
+            if (!string.IsNullOrWhiteSpace(imagePath))
+            {
+                record.ProfileImageUrl = imageUrl;
+                record.ProfileImagePath = imagePath;
+                record.ProfileImageIsFace = true;
+            }
             SaveUnsafe();
         }
     }
@@ -109,7 +126,14 @@ public sealed class CharacterRepository
             SaveUnsafe();
     }
 
-    private void SaveUnsafe() => pluginInterface.SavePluginConfig(configuration);
+    // Callers apply settings immediately. The shared checkpoint owns disk persistence.
+    private void SaveUnsafe() => markDirty();
+
+    public static bool IsComplete(CharacterRecord record) => record.ContentId != 0 &&
+        !string.IsNullOrWhiteSpace(record.CharacterName) && !string.IsNullOrWhiteSpace(record.HomeWorld) &&
+        record.HomeWorldId != 0 && record.CurrentClassJobId != 0 && record.Level > 0 &&
+        !string.IsNullOrWhiteSpace(record.ClassJob) &&
+        record.Jobs.Any(job => job.RowId == record.CurrentClassJobId && job.Level >= record.Level);
 
     private static CharacterRecord Clone(CharacterRecord source)
     {

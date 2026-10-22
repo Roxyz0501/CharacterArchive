@@ -1,18 +1,18 @@
 # 共通カスタムリポジトリ取り込み前チェックリスト
 
-この文書はローカル準備用です。GitHub、Release、共通repo.jsonへの外部操作はまだ行っていません。
+公開・更新時の確認項目です。公開履歴は PUBLICATION_STATE.md、今回の保存処理の検証は PERSISTENCE_FIX_REPORT.md を参照してください。未チェックの実機項目は未検証です。
 
 ## 確定メタデータ
 
 - InternalName: `CharacterArchive`
 - Name: `Character Archive`
-- AssemblyVersion: `1.0.0.1`
+- AssemblyVersion: `1.0.0.2`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
 - 必須依存プラグイン: なし
-- Release ZIP名: `CharacterArchive-1.0.0.1.zip`
+- Release ZIP名: `CharacterArchive-1.0.0.2.zip`
 
-Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは共通リポジトリ統合時に実在URLを注入します。
+Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは専用リポジトリと当該バージョンのReleaseを指定しています。公開後にURLとZIPを検証します。
 
 ## 人間によるコード・権利確認
 
@@ -34,7 +34,7 @@ Punchline、Description、Tagsを含む機械可読案は`distribution/Character
 - [ ] 韓国語・簡体字・繁体字・欧文アクセントのグリフと、ドイツ語・フランス語長文の折返しを実ゲームで確認する
 - [ ] ログイン時のキャラクター情報と全ジョブが正しい
 - [ ] ptime自動取得が既定OFFである
-- [ ] ptime自動取得を有効にした場合、ログインごとに1回だけ標準コマンドが実行される
+- [ ] ptime自動取得で正常送信はログインごとに1回、ローカル実行失敗は10秒間隔・最大3回で停止する
 - [ ] コマンド禁止中は実行せず、解除後の設定秒数を待つ
 - [ ] ptime手動取得の10秒制限が動作する
 - [ ] Lodestone自動検索が既定OFFである
@@ -53,7 +53,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.0.0.1.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
+`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.0.0.2.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
 
 - `CharacterArchive.dll`
 - `CharacterArchive.json`
@@ -76,3 +76,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 - [ ] 実在キャラクター名、Content ID、Lodestone ID、CSV、設定JSON、顔画像がない
 - [ ] `bin`、`obj`、IDEキャッシュ、ユーザー固有の絶対パスをGitへ追加していない
 - [ ] Release ZIP内にPDB、deps.json、テスト成果物、ローカルパスがない
+
+## 保存処理の実機確認（1.0.0.2）
+
+- [ ] 60秒変更時保存とログアウト・正常終了・無効化時のflush
+- [ ] 既存設定の読込と正常3世代バックアップからの復旧
+- [ ] 取得失敗停止・保存停止の通知と明示再試行
+- [ ] Lodestone検索中の無効化で処理・通信・リソースが残らない

@@ -31,7 +31,9 @@ public sealed class MainWindow : Window
         };
     }
 
-    public override void Draw()
+    public override void Draw() => plugin.WithConfigurationLock(DrawContents);
+
+    private void DrawContents()
     {
         fileDialogManager.Draw();
         var records = plugin.Repository.Snapshot();
@@ -79,7 +81,7 @@ public sealed class MainWindow : Window
         ImGui.Text(F("Saved characters: {0}", "保存済みキャラクター: {0}", count));
         ImGui.SameLine();
         if (ImGui.Button(T("Refresh Current Character", "現在のキャラクターを再取得")))
-            plugin.CaptureCurrentCharacter();
+            plugin.CaptureCurrentCharacter(retry: true);
         ImGui.SameLine();
         if (ImGui.Button(T("Refresh ptime", "ptime再取得")))
             statusMessage = plugin.RequestPlayTime()
@@ -91,6 +93,18 @@ public sealed class MainWindow : Window
             ImGui.TextDisabled(statusMessage);
         }
         ImGui.Separator();
+        if (plugin.CaptureStopped)
+        {
+            ImGui.TextWrapped(T("Character capture stopped after three failures. Press Refresh Current Character to retry.",
+                "キャラクター取得が3回失敗したため停止しました。「現在のキャラクターを再取得」で再開できます。"));
+            ImGui.TextUnformatted(plugin.CaptureError ?? string.Empty);
+        }
+        if (plugin.RecoveryBlocked)
+            ImGui.TextWrapped(T("Configuration could not be recovered. Restore a valid file and reload the plugin.",
+                "設定を復元できませんでした。正常なファイルを戻してプラグインを再読み込みしてください。"));
+        else if (plugin.SaveStopped)
+            ImGui.TextWrapped(T("Saving stopped after three failures. Open Settings and retry saving.",
+                "保存が3回失敗したため停止しました。設定から保存を再試行してください。"));
     }
 
     private void DrawOverview(IReadOnlyList<CharacterRecord> records)
@@ -255,6 +269,15 @@ public sealed class MainWindow : Window
 
     private void DrawSettings()
     {
+        ImGui.TextWrapped(T("Changes are saved every 60 seconds and on logout or normal shutdown.",
+            "変更は60秒ごとと、ログアウト・正常終了時に保存されます。"));
+        if (plugin.ConfigurationRecovered)
+            ImGui.TextWrapped(T("Configuration restored from a valid backup.", "正常なバックアップから設定を復元しました。"));
+        if (plugin.SaveError is { } saveError)
+        {
+            ImGui.TextUnformatted(saveError);
+            if (!plugin.RecoveryBlocked && ImGui.Button(T("Retry saving", "保存を再試行"))) plugin.RetrySave();
+        }
         var autoPlayTime = plugin.Configuration.AutoRequestPlayTimeOnLogin;
         if (ImGui.Checkbox(T("Automatically acquire ptime on login", "ログイン時にptimeを自動取得する"), ref autoPlayTime))
             plugin.SetAutoRequestPlayTimeOnLogin(autoPlayTime);
@@ -306,9 +329,10 @@ public sealed class MainWindow : Window
         var exportDirectory = plugin.Configuration.CsvExportDirectory;
         ImGui.SetNextItemWidth(-1);
         if (ImGui.InputText("##CsvExportDirectory", ref exportDirectory, 1024))
+        {
             plugin.Configuration.CsvExportDirectory = exportDirectory;
-        if (ImGui.IsItemDeactivatedAfterEdit())
             plugin.Repository.SaveSettings();
+        }
 
         if (ImGui.Button(T("Restore Default Folder", "既定の出力先に戻す")))
         {

@@ -1,5 +1,16 @@
 # Character Archive publication state
 
+## 2026-10-23 version 1.0.0.2
+
+- Source: https://github.com/Roxyz0501/CharacterArchive
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.0.0.2
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.2/CharacterArchive-1.0.0.2.zip
+- ZIP size: 83,152 bytes; SHA-256: `EF65B3527741F6EBAF02F7F63CF55626CD8F8829E5B66A792538F25836BE8724`.
+- Changed-only 60-second saves, logout/normal-shutdown/unload flush, atomic replacement, three valid backups and corruption recovery. Incomplete capture is rejected before mutation; failures stop after three attempts with explicit retry.
+- Same-character single-flight lookups and shutdown cancellation/drain; image download failures retain valid cached data. Normal command route and rate limits retained.
+- Fixed dependencies restored in locked mode; clean Release rebuild with zero warnings/errors; all core tests and 43 persistence/lifecycle checks passed. Eight unchanged periods: zero writes. Six hundred changes: one save / 238 logical bytes. Physical SSD writes and actual game integration remain unverified.
+- Release package remains four allowlisted runtime/license files. See PERSISTENCE_FIX_REPORT.md and distribution/RELEASE_NOTES-1.0.0.2.md for behavior and remaining manual tests.
+
 ## 2026-10-12 version 1.0.0.1
 
 - Source: https://github.com/Roxyz0501/CharacterArchive

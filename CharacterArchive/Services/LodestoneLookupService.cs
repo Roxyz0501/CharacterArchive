@@ -71,12 +71,8 @@ public sealed partial class LodestoneLookupService : IDisposable
             if (response.Content.Headers.ContentLength > MaximumImageBytes)
                 return null;
 
-            var directory = Path.GetDirectoryName(destinationPath);
-            if (!string.IsNullOrWhiteSpace(directory))
-                Directory.CreateDirectory(directory);
-
             await using var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            await using var destination = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            using var content = new MemoryStream();
             var buffer = new byte[81920];
             var total = 0;
             while (true)
@@ -86,14 +82,31 @@ public sealed partial class LodestoneLookupService : IDisposable
                     break;
                 total += read;
                 if (total > MaximumImageBytes)
-                {
-                    destination.Close();
-                    File.Delete(destinationPath);
                     return null;
-                }
-                await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                content.Write(buffer, 0, read);
             }
-
+            if (total == 0) return null;
+            var bytes = content.ToArray();
+            if (File.Exists(destinationPath) && new FileInfo(destinationPath).Length == bytes.Length &&
+                (await File.ReadAllBytesAsync(destinationPath, cancellationToken).ConfigureAwait(false)).AsSpan().SequenceEqual(bytes))
+                return destinationPath;
+            var directory = Path.GetDirectoryName(destinationPath);
+            if (!string.IsNullOrWhiteSpace(directory)) Directory.CreateDirectory(directory);
+            var temporary = destinationPath + ".tmp-" + Guid.NewGuid().ToString("N");
+            try
+            {
+                await using (var destination = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    await destination.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
+                    destination.Flush(true);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                File.Move(temporary, destinationPath, true);
+            }
+            finally
+            {
+                if (File.Exists(temporary)) File.Delete(temporary);
+            }
             return destinationPath;
         }
         finally

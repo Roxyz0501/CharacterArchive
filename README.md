@@ -38,7 +38,7 @@ Log into a character to add or update it. Use `/chararchive` to open or close th
 - **Automatically look up Lodestone ID on login:** Off by default.
 - **CSV output folder:** Initial folder for the save dialog; the final path is chosen for each export.
 
-Manual playtime acquisition has a 10-second rate limit. The plugin uses the normal game text-command path and does not construct or directly send custom packets, poll, or automatically retry.
+Playtime command attempts have a 10-second rate limit. Automatic acquisition waits for command availability and stops after three local execution failures; use Refresh ptime to retry. It does not retry a successfully submitted command just because no response arrived. The plugin uses the normal game text-command path and does not construct or directly send custom packets.
 
 ### Initial language selection
 
@@ -66,6 +66,16 @@ FFXIV folders are checked read-only. Lodestone HTTPS requests occur only after a
 
 The plugin itself does not contact Ko-fi. The browser opens `https://ko-fi.com/roxyz0501` only after the support button is clicked.
 
+## Saving and recovery
+
+Settings and character snapshots apply in memory immediately and are saved by one changed-only, 60-second scheduler. Unchanged values (including edits reverted before the checkpoint) cause no write. Logout, normal game shutdown, and plugin unload flush pending changes unless saving has stopped after failures. Forced termination can lose the unsaved interval (normally up to about 60 seconds); backups do not recover it.
+
+The same configuration path is retained, with three previous valid generations named `CharacterArchive.json.bak-<20-digit sequence>` beside it. Saves validate a temporary file before atomic replacement. On startup, a corrupt main file is restored from the newest valid backup and reported; the damaged main is kept as `CharacterArchive.json.corrupt-<id>`. If none is valid, saving is blocked instead of replacing your data with defaults. Close the game, retain copies, restore a valid configuration, then reload. Backup/corrupt files contain the same private character information as the main file.
+
+After three consecutive save failures, automatic saving stops and Settings offers **Retry saving**. Incomplete character/job capture never replaces a valid record; after three failures, use **Refresh Current Character** to resume. Same-character simultaneous Lodestone lookups share one operation; shutdown cancels and drains owned work. Existing face images are retained when downloading fails.
+
+Character records are current snapshots, not an append-only event history. No daily history files or empty History files tab are created. See [persistence verification](PERSISTENCE_FIX_REPORT.md) for synthetic test results and remaining live-game checks.
+
 ## Known limitations
 
 - Lodestone maintenance, search ambiguity, visibility, or HTML changes can prevent ID or image acquisition.
@@ -83,7 +93,7 @@ The plugin itself does not contact Ko-fi. The browser opens `https://ko-fi.com/r
 
 ## Uninstall and remove data
 
-Uninstall Character Archive in Dalamud. To remove stored data, close the game and Dalamud, then delete the configuration JSON and cache folder above. Delete exported CSV files separately.
+Uninstall Character Archive in Dalamud. To remove stored data, close the game and Dalamud, then delete the configuration JSON, its adjacent `.bak-*`, `.corrupt-*` and any crash-left `.tmp-*` files, and the cache folder above. Delete exported CSV files separately.
 
 ## Build and package
 
@@ -94,7 +104,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The release package is `artifacts\CharacterArchive-1.0.0.1.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.0.0.2.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 
