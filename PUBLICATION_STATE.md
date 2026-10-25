@@ -2,6 +2,9 @@
 
 ## 2026-10-25 version 1.1.0.0
 
+- Source/tag: `05c7e16bc9ce5b2e6dfa4265cd4c9182debbd3eb`. Public repository/release/icon HTTP200 (image/png); anonymous ZIP hash, four-file allowlist and manifest version/API15/Author/RepoUrl/IconUrl verified.
+- Shared index: `c5f82f938d7cb50af16fc976c1a7b163a9809a9c`; connector, commit-pinned and normal main raw URLs verified 1.1.0.0. All 13 other entries preserved.
+
 - Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.1.0.0
 - ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.0/CharacterArchive-1.1.0.0.zip
 - ZIP: 98,064 bytes; SHA-256 `E66F4C3E27B40F58D77F377B318F200847D1F74FE90D879A8C0E9F2103D4B1E9`.
