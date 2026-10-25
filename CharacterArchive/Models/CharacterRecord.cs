@@ -27,6 +27,7 @@ public sealed class CharacterRecord
     public string StartTown { get; set; } = string.Empty;
     public uint? PlayTimeMinutes { get; set; }
     public DateTime? PlayTimeUpdatedAt { get; set; }
+    public MainScenarioProgress? MainScenario { get; set; }
     public DateTime FirstSeenAt { get; set; }
     public DateTime LastSeenAt { get; set; }
 }

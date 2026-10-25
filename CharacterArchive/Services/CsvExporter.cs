@@ -11,7 +11,7 @@ public static class CsvExporter
         ResolvedLanguage language = ResolvedLanguage.Japanese)
     {
         Directory.CreateDirectory(outputDirectory);
-        var path = Path.Combine(outputDirectory, $"character_file_mapping_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+        var path = Path.Combine(outputDirectory, $"character_file_mapping_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}.csv");
 
         ExportToPath(records, path, language);
         return path;
@@ -39,7 +39,18 @@ public static class CsvExporter
                 Escape(record.LodestoneId ?? string.Empty),
                 Escape(record.ConfigFolderName))));
 
-        File.WriteAllLines(path, lines, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+        var temporary = Path.GetFullPath(path) + ".tmp-" + Guid.NewGuid().ToString("N");
+        try
+        {
+            using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                using (var writer = new StreamWriter(stream, new UTF8Encoding(true), leaveOpen: true))
+                    foreach (var line in lines) writer.WriteLine(line);
+                stream.Flush(true);
+            }
+            File.Move(temporary, path, true);
+        }
+        finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }
 
     private static string Escape(string value) =>

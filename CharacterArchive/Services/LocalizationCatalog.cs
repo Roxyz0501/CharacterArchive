@@ -9,6 +9,20 @@ public static partial class LocalizationCatalog
 
     private static readonly IReadOnlyDictionary<string, Entry> Entries = new Dictionary<string, Entry>(StringComparer.Ordinal)
     {
+        ["Main Scenario"] = new("メインクエスト", "Hauptszenario", "Épopée", "주요 퀘스트", "主线任务", "主線任務"),
+        ["Not acquired"] = new("未取得", "Nicht erfasst", "Non acquis", "미취득", "未获取", "未取得"),
+        ["In progress"] = new("受注中", "In Bearbeitung", "En cours", "진행 중", "进行中", "進行中"),
+        ["Not accepted"] = new("未受注", "Nicht angenommen", "Non acceptée", "미수락", "未接受", "未接受"),
+        ["Last completed"] = new("直前にクリア", "Zuletzt abgeschlossen", "Dernière terminée", "마지막 완료", "最近完成", "最近完成"),
+        ["Latest available story completed"] = new("現在の最終クエストまで完了", "Aktuell verfügbares Hauptszenario abgeschlossen", "Épopée disponible terminée", "현재 공개된 주요 퀘스트 완료", "已完成当前开放的主线", "已完成目前開放的主線"),
+        ["Quest"] = new("クエスト", "Auftrag", "Quête", "퀘스트", "任务", "任務"),
+        ["Chapter"] = new("章", "Kapitel", "Chapitre", "장", "章节", "章節"),
+        ["Quest ID"] = new("クエストID", "Auftrags-ID", "ID de quête", "퀘스트 ID", "任务ID", "任務ID"),
+        ["Quest sequence"] = new("クエスト内部進行値", "Interner Auftragsfortschritt", "Séquence interne de quête", "퀘스트 내부 진행값", "任务内部进度值", "任務內部進度值"),
+        ["Reads received game data every 10 seconds while logged in. Offline characters show the last saved observation. Quest sequence is not a percentage."] = new("ログイン中は受信済みのゲーム情報を10秒ごとに読み取ります。未ログインのキャラクターは最後の記録を表示します。内部進行値は進捗率ではありません。", "Liest angemeldet alle 10 Sekunden empfangene Spieldaten. Abgemeldete Charaktere zeigen den letzten gespeicherten Stand. Die Sequenz ist keine Prozentangabe.", "Lit les données reçues toutes les 10 secondes pendant la connexion. Les personnages hors ligne affichent le dernier état enregistré. La séquence n’est pas un pourcentage.", "로그인 중에는 수신된 게임 정보를 10초마다 읽습니다. 오프라인 캐릭터는 마지막 저장 상태를 표시합니다. 내부 진행값은 백분율이 아닙니다.", "登录时每10秒读取已接收的游戏信息。离线角色显示最后保存的记录。内部进度值不是百分比。", "登入時每10秒讀取已接收的遊戲資訊。離線角色顯示最後儲存的記錄。內部進度值不是百分比。"),
+        ["Main scenario acquisition stopped. Refresh Current Character to retry."] = new("メインクエストの取得を停止しました。「現在のキャラクターを再取得」で再試行できます。", "Hauptszenario-Abruf angehalten. Aktualisiere den aktuellen Charakter zum Wiederholen.", "Acquisition de l’épopée arrêtée. Actualisez le personnage actuel pour réessayer.", "주요 퀘스트 수집을 중지했습니다. 현재 캐릭터 새로고침으로 다시 시도하세요.", "主线任务获取已停止。请刷新当前角色重试。", "主線任務取得已停止。請重新整理目前角色重試。"),
+        ["ID acquired; face image unavailable"] = new("ID取得済み・顔画像は未取得", "ID erfasst; Gesichtsbild nicht verfügbar", "ID acquis ; portrait indisponible", "ID 수집 완료 · 얼굴 이미지 없음", "已获取ID；头像不可用", "已取得ID；頭像無法取得"),
+        ["Acquired: {0}"] = new("取得: {0}", "Erfasst: {0}", "Acquis : {0}", "수집 완료: {0}", "已获取：{0}", "已取得：{0}"),
         ["Retry saving"] = new("保存を再試行", "Speichern erneut versuchen", "Réessayer l’enregistrement", "저장 다시 시도", "重试保存", "重試儲存"),
         ["Automatic ptime acquisition stopped after three failures. Use Refresh ptime to retry."] = new("ptime自動取得が3回失敗したため停止しました。「ptime再取得」で再試行してください。", "Automatischer Spielzeitabruf nach drei Fehlern angehalten. Nutze Spielzeit aktualisieren zum Wiederholen.", "Acquisition automatique arrêtée après trois échecs. Utilisez Actualiser le temps de jeu pour réessayer.", "3회 실패하여 자동 플레이 시간 수집을 중지했습니다. 플레이 시간 새로고침으로 다시 시도하세요.", "自动获取游戏时间连续失败三次后已停止。请刷新游戏时间重试。", "自動取得遊玩時間連續失敗三次後已停止。請重新整理遊玩時間重試。"),
         ["Changes are saved every 60 seconds and on logout or normal shutdown."] = new("変更は60秒ごとと、ログアウト・正常終了時に保存されます。", "Änderungen werden alle 60 Sekunden sowie beim Abmelden und regulären Beenden gespeichert.", "Les modifications sont enregistrées toutes les 60 secondes et à la déconnexion ou fermeture normale.", "변경 사항은 60초마다, 로그아웃 또는 정상 종료 시 저장됩니다.", "更改每60秒保存一次，并在登出或正常退出时保存。", "變更每60秒儲存一次，並在登出或正常結束時儲存。"),

@@ -23,6 +23,11 @@ public sealed class Plugin : IDalamudPlugin
     private readonly OwnedOperations operations = new();
     private readonly ConcurrentQueue<System.Action> completions = new();
     private readonly CaptureRetryState captureRetry = new();
+    private readonly CaptureRetryState mainScenarioRetry = new();
+    private readonly MainScenarioService mainScenarioService;
+    private long mainScenarioCheckedAt;
+    private long mainScenarioSessionStartedAt = TimeProvider.System.GetTimestamp();
+    private (ulong ContentId, uint Minutes)? pendingPlayTime;
     private readonly HashSet<ulong> automaticLookups = [];
     private readonly DeferredConfigurationStore<Configuration> storage;
     private readonly CancellationTokenRegistration shutdownFlush;
@@ -60,6 +65,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public unsafe Plugin()
     {
+        mainScenarioService = new MainScenarioService(DataManager);
         storage = new DeferredConfigurationStore<Configuration>(PluginInterface.ConfigFile.FullName,
             () => new Configuration(), ConfigurationCodec.Decode, ConfigurationCodec.Encode);
         Configuration = storage.Value;
@@ -169,17 +175,13 @@ public sealed class Plugin : IDalamudPlugin
                 return false;
 
             playTimeRetry.Reset();
-            Log.Information(Localizer.Text(
-                "Executed the standard /playtime command.",
-                "ゲーム標準の/playtimeコマンドを実行しました"));
+            Log.Information("Executed the standard /playtime command.");
             return true;
         }
         catch (Exception exception)
         {
             if (retry)
-                Log.Warning(exception, Localizer.Text(
-                    "Could not execute the standard /playtime command.",
-                    "ゲーム標準の/playtimeコマンドを実行できませんでした"));
+                Log.Warning(exception, "Could not execute the standard /playtime command.");
             return false;
         }
     }
@@ -204,18 +206,16 @@ public sealed class Plugin : IDalamudPlugin
         try
         {
             var totalMinutes = unchecked((uint)Marshal.ReadInt32((nint)packet + 0x10));
-            storage.WithLock(() => Repository.SetPlayTime(PlayerState.ContentId, totalMinutes));
-            Log.Information(Localizer.Text(
-                    "Saved playtime: {Minutes} minutes ({ContentId:X16})",
-                    "プレイ時間を保存しました: {Minutes}分 ({ContentId:X16})"),
-                totalMinutes,
-                PlayerState.ContentId);
+            storage.WithLock(() =>
+            {
+                var contentId = PlayerState.ContentId;
+                if (!Repository.SetPlayTime(contentId, totalMinutes)) pendingPlayTime = (contentId, totalMinutes);
+            });
+            Log.Information("Recorded playtime response.");
         }
         catch (Exception exception)
         {
-            Log.Warning(exception, Localizer.Text(
-                "Could not process the playtime response.",
-                "プレイ時間の応答を処理できませんでした"));
+            Log.Warning(exception, "Could not process the playtime response.");
         }
     }
 
@@ -228,13 +228,19 @@ public sealed class Plugin : IDalamudPlugin
         if (retry)
         {
             captureRetry.Reset();
+            mainScenarioRetry.Reset();
             CaptureError = null;
         }
         if (!captureRetry.CanAttempt(DateTime.UtcNow)) return;
+        if (!PlayerState.IsLoaded)
+        {
+            // Login readiness is expected, not a failed capture. Wait without logging or saving.
+            pendingLoginCapture = true;
+            captureRetry.WaitForLoading(DateTime.UtcNow);
+            return;
+        }
         try
         {
-        if (!PlayerState.IsLoaded)
-            throw new InvalidDataException("PlayerState is not loaded.");
         var now = DateTime.Now;
         var contentId = PlayerState.ContentId;
         var configPath = CharacterFileLocator.GetFolderPath(contentId);
@@ -266,15 +272,16 @@ public sealed class Plugin : IDalamudPlugin
 
         // Repository also checks completeness and rejects lost/regressed known job levels.
         var saved = Repository.Upsert(record);
+        if (pendingPlayTime is { } time && time.ContentId == saved.ContentId)
+        {
+            Repository.SetPlayTime(time.ContentId, time.Minutes);
+            pendingPlayTime = null;
+        }
+        CaptureMainScenario(saved.ContentId);
         pendingLoginCapture = false;
         captureRetry.Reset();
         CaptureError = null;
-        Log.Information(Localizer.Text(
-                "Saved character data: {Name}@{World} ({ContentId:X16})",
-                "キャラクター情報を保存しました: {Name}@{World} ({ContentId:X16})"),
-            saved.CharacterName,
-            saved.HomeWorld,
-            saved.ContentId);
+        Log.Information("Updated character snapshot.");
 
         if (Configuration.AutoLookupLodestoneId && string.IsNullOrWhiteSpace(saved.LodestoneId) &&
             automaticLookups.Add(saved.ContentId))
@@ -311,8 +318,11 @@ public sealed class Plugin : IDalamudPlugin
             }
 
             string? imagePath = null;
+            var imageFailed = string.IsNullOrWhiteSpace(result.ProfileImageUrl);
             if (!string.IsNullOrWhiteSpace(result.ProfileImageUrl))
             {
+                try
+                {
                 var imageDirectory = Path.Combine(PluginInterface.GetPluginConfigDirectory(), "profile-images");
                 var extension = GetSafeImageExtension(result.ProfileImageUrl);
                 var destination = Path.Combine(imageDirectory, $"{record.ContentId:X16}{extension}");
@@ -322,14 +332,23 @@ public sealed class Plugin : IDalamudPlugin
                     result.ProfileImageUrl,
                     destination,
                     token).ConfigureAwait(false);
+                    imageFailed = imagePath is null;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException || !token.IsCancellationRequested)
+                {
+                    imageFailed = true;
+                    // A failed avatar must not discard an independently verified Lodestone ID.
+                    Log.Debug(ex, "Could not update the Lodestone face image.");
+                }
             }
 
             completions.Enqueue(() =>
             {
-            Repository.SetLodestoneData(record.ContentId, result.LodestoneId, result.ProfileImageUrl, imagePath);
-            mainWindow.SetLookupResult(record.ContentId, Localizer.Text(
-                $"Acquired: {result.LodestoneId}",
-                $"取得: {result.LodestoneId}"));
+            if (!Repository.SetLodestoneDataIfUnchanged(record.ContentId, record.LodestoneId,
+                    result.LodestoneId, result.ProfileImageUrl, imagePath)) return;
+            mainWindow.SetLookupResult(record.ContentId, imageFailed
+                ? Localizer.Text("ID acquired; face image unavailable", "ID取得済み・顔画像は未取得")
+                : Localizer.Format("Acquired: {0}", "取得: {0}", result.LodestoneId));
             });
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -339,9 +358,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             completions.Enqueue(() =>
             {
-            Log.Warning(exception, Localizer.Text(
-                "Failed to acquire the Lodestone ID.",
-                "Lodestone IDの取得に失敗しました"));
+            Log.Warning(exception, "Failed to acquire the Lodestone ID.");
             mainWindow.SetLookupResult(record.ContentId, Localizer.Text("Acquisition failed", "取得に失敗しました"));
             });
         }
@@ -390,7 +407,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             completions.Enqueue(() =>
             {
-                Log.Warning(exception, Localizer.Text("Failed to acquire the Lodestone ID.", "Lodestone IDの取得に失敗しました"));
+                Log.Warning(exception, "Failed to acquire the Lodestone ID.");
                 mainWindow.SetBatchLookupStatus(Localizer.Text("Acquisition failed", "取得に失敗しました"));
             });
         }
@@ -434,6 +451,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnLogin()
     {
+        mainScenarioSessionStartedAt = TimeProvider.System.GetTimestamp();
         pendingLoginCapture = !captureRetry.Stopped;
         automaticLookups.Clear();
         pendingPlayTimeRequest = Configuration.AutoRequestPlayTimeOnLogin && !playTimeRetry.Stopped;
@@ -451,6 +469,7 @@ public sealed class Plugin : IDalamudPlugin
         pendingLoginCapture = false;
         pendingPlayTimeRequest = false;
         storage.WithLock(() => { DrainCompletions(); storage.Flush(); });
+        pendingPlayTime = null;
     }
 
     private void DrainCompletions()
@@ -470,6 +489,9 @@ public sealed class Plugin : IDalamudPlugin
         storage.Tick();
         if (!ClientState.IsLoggedIn)
             return;
+
+        if (PlayerState.IsLoaded && TimeProvider.System.GetElapsedTime(mainScenarioCheckedAt) >= TimeSpan.FromSeconds(10))
+            CaptureMainScenario(PlayerState.ContentId);
 
         var now = DateTime.UtcNow;
         if (pendingLoginCapture && captureRetry.CanAttempt(now))
@@ -513,6 +535,29 @@ public sealed class Plugin : IDalamudPlugin
                     Chat.PrintError(Localizer.Text("Automatic ptime acquisition stopped after three failures. Use Refresh ptime to retry.",
                         "ptime自動取得が3回失敗したため停止しました。「ptime再取得」で再試行してください。"));
                 }
+            }
+        }
+    }
+
+    private void CaptureMainScenario(ulong contentId)
+    {
+        mainScenarioCheckedAt = TimeProvider.System.GetTimestamp();
+        if (mainScenarioRetry.Stopped || !PlayerState.IsLoaded || PlayerState.ContentId != contentId || storage.RecoveryBlocked) return;
+        // PlayerState may load before the guide/quest flags have switched to the new login session.
+        if (TimeProvider.System.GetElapsedTime(mainScenarioSessionStartedAt) < TimeSpan.FromSeconds(3)) return;
+        try
+        {
+            var progress = mainScenarioService.Capture();
+            if (progress is not null) Repository.SetMainScenario(contentId, progress);
+            mainScenarioRetry.Reset();
+        }
+        catch (Exception ex)
+        {
+            if (mainScenarioRetry.Fail(DateTime.UtcNow))
+            {
+                Log.Warning(ex, "Main scenario capture stopped after three failures.");
+                Chat.PrintError(Localizer.Text("Main scenario acquisition stopped. Refresh Current Character to retry.",
+                    "メインクエストの取得を停止しました。「現在のキャラクターを再取得」で再試行できます。"));
             }
         }
     }

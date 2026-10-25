@@ -2,15 +2,15 @@
   "Author": "Roxyz0501",
   "Name": "Character Archive",
   "InternalName": "CharacterArchive",
-  "AssemblyVersion": "1.0.0.2",
+  "AssemblyVersion": "1.1.0.0",
   "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
   "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/CharacterArchive/main/CharacterArchive/images/icon.png",
-  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.2/CharacterArchive-1.0.0.2.zip",
-  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.0.0.2/CharacterArchive-1.0.0.2.zip",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.0/CharacterArchive-1.1.0.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.0/CharacterArchive-1.1.0.0.zip",
   "Tags": [
     "character",
     "config",
@@ -19,6 +19,6 @@
     "playtime"
   ],
   "RequiredPlugins": [],
-  "ReleaseArtifact": "CharacterArchive-1.0.0.2.zip",
-  "Changelog": "Changed-only 60-second saves, logout/shutdown flush, three valid backups and recovery, bounded capture retries, and lookup shutdown cleanup. Synthetic tests passed; live-game behavior remains unverified."
+  "ReleaseArtifact": "CharacterArchive-1.1.0.0.zip",
+  "Changelog": "Adds read-only main-scenario progress per character. Fixes exact Lodestone matching, late lookup overwrite, face-download failure handling, future-config downgrade, maintenance retries, early playtime capture and atomic CSV output. Synthetic and offline catalogue checks passed; live-game acceptance remains unverified."
 }

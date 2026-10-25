@@ -7,6 +7,7 @@ public sealed class CharacterRepository
     private readonly object syncRoot = new();
     private readonly Action markDirty;
     private readonly Configuration configuration;
+    public long Revision { get; private set; }
 
     public CharacterRepository(Action markDirty, Configuration configuration)
     {
@@ -47,6 +48,7 @@ public sealed class CharacterRepository
                 var playTimeMinutes = existing.PlayTimeMinutes;
                 var playTimeUpdatedAt = existing.PlayTimeUpdatedAt;
                 var firstSeen = existing.FirstSeenAt;
+                var mainScenario = existing.MainScenario;
                 // Optional fields can temporarily be unavailable. Do not erase previously known values.
                 if (string.IsNullOrWhiteSpace(captured.Race)) captured.Race = existing.Race;
                 if (string.IsNullOrWhiteSpace(captured.Tribe)) captured.Tribe = existing.Tribe;
@@ -65,6 +67,7 @@ public sealed class CharacterRepository
                 existing.PlayTimeMinutes = playTimeMinutes;
                 existing.PlayTimeUpdatedAt = playTimeUpdatedAt;
                 existing.FirstSeenAt = firstSeen;
+                existing.MainScenario = mainScenario;
             }
 
             SaveUnsafe();
@@ -72,19 +75,20 @@ public sealed class CharacterRepository
         }
     }
 
-    public void SetPlayTime(ulong contentId, uint totalMinutes)
+    public bool SetPlayTime(ulong contentId, uint totalMinutes)
     {
         lock (syncRoot)
         {
             var record = configuration.Characters.FirstOrDefault(item => item.ContentId == contentId);
             if (record is null)
-                return;
+                return false;
 
-            if (record.PlayTimeMinutes == totalMinutes) return;
+            if (record.PlayTimeMinutes == totalMinutes) return true;
 
             record.PlayTimeMinutes = totalMinutes;
             record.PlayTimeUpdatedAt = DateTime.Now;
             SaveUnsafe();
+            return true;
         }
     }
 
@@ -96,19 +100,32 @@ public sealed class CharacterRepository
             if (record is null)
                 return;
 
-            record.LodestoneId = string.IsNullOrWhiteSpace(lodestoneId) ? null : lodestoneId.Trim();
+            var next = string.IsNullOrWhiteSpace(lodestoneId) ? null : lodestoneId.Trim();
+            if (record.LodestoneId == next) return;
+            record.LodestoneId = next;
+            record.ProfileImageUrl = record.ProfileImagePath = null;
+            record.ProfileImageIsFace = false;
             SaveUnsafe();
         }
     }
 
     public void SetLodestoneData(ulong contentId, string lodestoneId, string? imageUrl, string? imagePath)
+        => SetLodestoneDataIfUnchanged(contentId, null, lodestoneId, imageUrl, imagePath, false);
+
+    public bool SetLodestoneDataIfUnchanged(ulong contentId, string? expectedId, string lodestoneId,
+        string? imageUrl, string? imagePath, bool compare = true)
     {
         lock (syncRoot)
         {
             var record = configuration.Characters.FirstOrDefault(item => item.ContentId == contentId);
-            if (record is null)
-                return;
+            if (record is null || (compare && record.LodestoneId != expectedId))
+                return false;
 
+            if (record.LodestoneId != lodestoneId)
+            {
+                record.ProfileImageUrl = record.ProfileImagePath = null;
+                record.ProfileImageIsFace = false;
+            }
             record.LodestoneId = lodestoneId;
             if (!string.IsNullOrWhiteSpace(imagePath))
             {
@@ -116,6 +133,18 @@ public sealed class CharacterRepository
                 record.ProfileImagePath = imagePath;
                 record.ProfileImageIsFace = true;
             }
+            SaveUnsafe();
+            return true;
+        }
+    }
+
+    public void SetMainScenario(ulong contentId, MainScenarioProgress progress)
+    {
+        lock (syncRoot)
+        {
+            var record = configuration.Characters.FirstOrDefault(r => r.ContentId == contentId);
+            if (record is null || MainScenarioResolver.SameObservation(record.MainScenario, progress)) return;
+            record.MainScenario = progress;
             SaveUnsafe();
         }
     }
@@ -127,7 +156,7 @@ public sealed class CharacterRepository
     }
 
     // Callers apply settings immediately. The shared checkpoint owns disk persistence.
-    private void SaveUnsafe() => markDirty();
+    private void SaveUnsafe() { Revision++; markDirty(); }
 
     public static bool IsComplete(CharacterRecord record) => record.ContentId != 0 &&
         !string.IsNullOrWhiteSpace(record.CharacterName) && !string.IsNullOrWhiteSpace(record.HomeWorld) &&
@@ -175,6 +204,7 @@ public sealed class CharacterRepository
         destination.StartTown = source.StartTown;
         destination.PlayTimeMinutes = source.PlayTimeMinutes;
         destination.PlayTimeUpdatedAt = source.PlayTimeUpdatedAt;
+        destination.MainScenario = source.MainScenario;
         destination.FirstSeenAt = source.FirstSeenAt;
         destination.LastSeenAt = source.LastSeenAt;
     }

@@ -6,11 +6,11 @@
 
 - InternalName: `CharacterArchive`
 - Name: `Character Archive`
-- AssemblyVersion: `1.0.0.2`
+- AssemblyVersion: `1.1.0.0`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
 - 必須依存プラグイン: なし
-- Release ZIP名: `CharacterArchive-1.0.0.2.zip`
+- Release ZIP名: `CharacterArchive-1.1.0.0.zip`
 
 Punchline、Description、Tagsを含む機械可読案は`distribution/CharacterArchive.metadata.json`にあります。RepoUrl、DownloadLinkInstall、DownloadLinkUpdateは専用リポジトリと当該バージョンのReleaseを指定しています。公開後にURLとZIPを検証します。
 
@@ -53,7 +53,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.0.0.2.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
+`scripts/pack-release.ps1`は`artifacts/CharacterArchive-1.1.0.0.zip`を生成し、内容が次の4ファイルだけであることを検証します。言語リソースと共通タブ実装はDLLへ埋め込まれます。
 
 - `CharacterArchive.dll`
 - `CharacterArchive.json`
@@ -77,9 +77,17 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 - [ ] `bin`、`obj`、IDEキャッシュ、ユーザー固有の絶対パスをGitへ追加していない
 - [ ] Release ZIP内にPDB、deps.json、テスト成果物、ローカルパスがない
 
-## 保存処理の実機確認（1.0.0.2）
+## 保存処理の実機確認（1.1.0.0）
 
 - [ ] 60秒変更時保存とログアウト・正常終了・無効化時のflush
 - [ ] 既存設定の読込と正常3世代バックアップからの復旧
 - [ ] 取得失敗停止・保存停止の通知と明示再試行
 - [ ] Lodestone検索中の無効化で処理・通信・リソースが残らない
+
+## メインクエストと再点検（1.1.0.0）
+
+- [ ] 実ゲームで進捗・分岐・最終完了・パッチ更新・強くてニューゲームを確認
+- [ ] ログイン・ログアウト・キャラクター切替直後に別キャラの進捗を記録しない
+- [ ] 概要の横スクロールと詳細タブの7言語表示を確認
+- [ ] Lodestone実HTMLとの完全一致判定と顔画像取得を確認
+- 合成・オフライン検証結果は REVIEW_2026-10-25.md を参照

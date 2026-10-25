@@ -7,6 +7,7 @@ internal sealed class CaptureRetryState
     public DateTime NextAttempt { get; private set; }
     public bool CanAttempt(DateTime now) => !Stopped && now >= NextAttempt;
     public void Reset() { Failures = 0; NextAttempt = DateTime.MinValue; }
+    public void WaitForLoading(DateTime now) { if (!Stopped) NextAttempt = now.AddSeconds(1); }
     public bool Fail(DateTime now)
     {
         if (Stopped) return false;

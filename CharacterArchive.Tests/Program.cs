@@ -35,6 +35,17 @@ foreach (var savedLanguage in Enum.GetValues<DisplayLanguage>())
 AssertEqual(1, (int)DisplayLanguage.English, "旧English enum番号維持");
 AssertEqual(2, (int)DisplayLanguage.Japanese, "旧日本語enum番号維持");
 AssertEqual(0, LocalizationCatalog.Validate().Count, "7言語リソースの空値・書式引数整合");
+foreach (var source in new[] { mainWindowSource, File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Plugin.cs")) })
+{
+    foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(source,
+        "(?:\\bT|\\bF|Localizer\\.(?:Text|Format))\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\""))
+    {
+        var key = System.Text.Json.JsonSerializer.Deserialize<string>("\"" + match.Groups[1].Value + "\"")!;
+        foreach (var language in Enum.GetValues<ResolvedLanguage>())
+            Assert(LocalizationCatalog.TryGet(key, language, out var value) && !string.IsNullOrWhiteSpace(value),
+                $"UIの翻訳キー網羅:{language}:{key}");
+    }
+}
 
 AssertEqual("FFXIV_CHR0123456789ABCDEF", CharacterFileLocator.GetFolderName(0x0123456789ABCDEF),
     "設定フォルダ名");
@@ -97,6 +108,7 @@ finally
 }
 
 await PersistenceTests.Run(failures);
+await ReviewTests.Run(failures);
 
 if (failures.Count > 0)
 {

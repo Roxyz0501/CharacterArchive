@@ -28,7 +28,7 @@ public sealed class LocalizationService
             return english;
         if (LocalizationCatalog.TryGet(english, Current, out var translated))
             return translated;
-        return Current == ResolvedLanguage.Japanese ? japanese : $"[{english}]";
+        return Current == ResolvedLanguage.Japanese ? japanese : english;
     }
 
     public string Format(string englishFormat, string japaneseFormat, params object[] arguments) =>

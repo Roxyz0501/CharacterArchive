@@ -6,6 +6,7 @@ Character Archiveは、Roxyz0501が作成するXIVLauncher / Dalamud向けキャ
 
 ## 主な機能
 
+- メインクエストの選択中ルートのクエスト・章・受注状態・内部進行値を表示し、未ログインのキャラクターは最後の記録を保持
 - キャラクター名、ホーム／現在ワールド、Content ID、種族、部族、性別、カレントジョブ／レベル、全クラス・ジョブのレベルを記録
 - Content IDから対応する`FFXIV_CHR...`設定フォルダを読み取り専用で特定
 - 標準`/playtime`応答を「12日 3時間 45分」または`00291:45:00`で表示
@@ -62,9 +63,19 @@ Dalamud設定へContent ID、キャラクター名、ワールド、Lodestone ID
 - 顔画像キャッシュ・既定CSVフォルダ：`%APPDATA%\XIVLauncher\pluginConfigs\CharacterArchive\`
 - CSV：ユーザーが明示的に選んだ場所
 
-FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検索操作時または自動検索を有効にした場合だけ行い、公式`*.finalfantasyxiv.com`へキャラクター名とホームワールドを送信して公開Lodestone ID・顔画像を取得します。Content ID、ローカルパス、ジョブ、ptime、CSVは送信しません。まとめ検索は直列・1秒間隔、タイムアウト20秒、画像は公式HTTPSホスト・5MB以下です。
+メインクエストのID・名前・章・状態・内部進行値・記録日時も設定JSONへ保存します。
+
+FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検索操作時または自動検索を有効にした場合だけ行い、公式`*.finalfantasyxiv.com`へキャラクター名とホームワールドを送信して公開Lodestone ID・顔画像を取得します。Content ID、ローカルパス、ジョブ、ptime、メインクエスト進捗、CSVは送信しません。検索結果とプロフィールの名前・ホームワールドが完全一致することを確認し、曖昧な結果やHTML変更時には推測しません。画像とリダイレクトを含む全Lodestone通信を直列・最低1秒間隔に制限し、処理全体の期限を20秒、HTMLを2MiB、画像を5MiBまでに制限します。リダイレクト先も公式HTTPSホストだけです。
 
 プラグイン自身はKo-fiへ通信しません。支援ボタンを押した場合だけ既定ブラウザで`https://ko-fi.com/roxyz0501`を開きます。
+
+## メインクエストの進捗
+
+概要一覧に「メインクエスト」列を追加し、キャラクター詳細内の「メインクエスト」タブでクエスト名・ID、章、受注状態、内部進行値、最後に状態が変わった記録日時を確認できます。「受注中」「未受注」「直前にクリア」「現在の最終クエストまで完了」を区別します。内部進行値はゲーム内部の値であり、進捗率ではありません。
+
+ログイン直後の短い準備期間後、ログイン中は10秒間隔で受信済みのクライアント情報を確認します。「現在のキャラクターを再取得」でも更新できます。シナリオガイドとクエストの受注・クリア情報を読み取るだけで、クエスト用コマンド、UI操作、追加のサーバー照会は行いません。未ログインのキャラクターへは問い合わせません。クエスト名・章名はゲームクライアントのデータ言語で表示し、7言語UIのために存在しないゲーム翻訳を作りません。
+
+「現在の最終クエストまで完了」は、インストール済みのメインクエスト定義から一意に特定した終端クエストがクリア済みの場合だけ表示します。ガイドが空・未読込という理由では完了と判定しません。取得不能時は既存の記録を保持し、日時は最後に状態が変わった記録時点を示します。パッチで終端が変わる場合があります。ゲーム更新による内部構造の変化と、実ゲームでの表示・取得は別途確認が必要です。
 
 ## 保存・復旧
 
@@ -84,8 +95,11 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 - 韓国語・簡体字・繁体字の表示可否は使用中のDalamudフォントアトラスにも依存するため、公開前に実ゲームでの目視確認が必要です。
 - 利用者自身でFFXIV、XIVLauncher、Dalamudの最新規約・方針を確認してください。
 
+再現した不具合・修正と検証範囲は[1.1.0.0の再点検記録](REVIEW_2026-10-25.md)を参照してください。
+
 ## トラブルシューティング
 
+- メインクエストが未取得の場合はログイン完了を待って「現在のキャラクターを再取得」を押してください。未ログインの記録はリアルタイムではなく、取得不能時も既存の記録は消しません。
 - 顔画像がない場合は個別／まとめ検索を再実行し、公開プロフィールを確認してください。
 - ログイン直後に`/playtime`が使えない場合は待機秒数を増やすか、ログイン完了後に手動再取得してください。
 - 表示言語が意図と異なる場合は言語設定タブで7言語のいずれかを選択してください。以後その値を維持します。
@@ -104,12 +118,13 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.0.0.2.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.1.0.0.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 
 - **BetterPlaytime** — 作者Infi、[リポジトリ](https://github.com/caitlyn-gg/BetterPlaytime)、MIT License。標準`/playtime`をテキストコマンド経路で実行し、`UIModule.PrintPlayTime`応答から分単位ptimeを取得する考え方を参考にしています。該当箇所は`GameChatCommandService.cs`と`Plugin.cs`のptime応答処理です。
-- **FFXIVClientStructs** — aersおよびコントリビューター、[リポジトリ](https://github.com/aers/FFXIVClientStructs)、MIT License。実行環境提供の`UIModule`、`RaptureShellModule`、`Utf8String`等の公開型・APIを利用し、バイナリやソースは同梱しません。
+- **Questionable** — the Puni.sh Quest Squad、[リポジトリ](https://github.com/PunishXIV/Questionable)、GNU AGPL v3（上流LICENSE参照）。`QuestInfo`のゲームデータ上のメインクエスト判別値（`JournalGenre.Icon == 61412`）を参考情報として確認し、インストール済みデータで独立に検証しました。Questionableのコード・クエストスクリプト・アセットはコピー・再配布せず、依存プラグインでもありません。
+- **FFXIVClientStructs** — aersおよびコントリビューター、[リポジトリ](https://github.com/aers/FFXIVClientStructs)、MIT License。実行環境提供の`UIModule`、`RaptureShellModule`、`Utf8String`、`QuestManager`、`AgentScenarioTree`等の公開型・APIを利用し、バイナリやソースは同梱しません。
 
 必要な表示は[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に収録しています。第三者の成果をRoxyz0501の作成物として扱いません。
 

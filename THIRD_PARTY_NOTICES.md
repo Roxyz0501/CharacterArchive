@@ -1,5 +1,10 @@
 # Third-party notices
 
+## Main-scenario API and classification reference (1.1.0.0)
+
+- FFXIVClientStructs (aers and contributors, MIT): runtime `QuestManager` and `AgentScenarioTree` types are used to read already-received quest and scenario-guide state. The existing FFXIVClientStructs notice below applies. No game quest data is bundled.
+- Questionable — the Puni.sh Quest Squad, https://github.com/PunishXIV/Questionable, GNU AGPL v3 (see upstream LICENSE): consulted only for the game-data main-scenario discriminator `JournalGenre.Icon == 61412` in `QuestInfo`. Character Archive independently validates the installed quest graph and implements its own read-only resolver. No Questionable code, scripts, data or assets are copied or distributed, and no Questionable runtime dependency is added.
+
 Character Archiveは既存プラグインのフォークではありません。ptime取得では、Dalamud公式一覧掲載のBetterPlaytimeを参考に、ゲーム標準の`/playtime`入力経路と`PrintPlayTime`応答の読み取り方法を実装しています。また、Dalamudが提供するFFXIVClientStructsの公開APIを利用しています。第三者の画像・アイコン・データファイルは配布物へ同梱していません。
 
 ## BetterPlaytime

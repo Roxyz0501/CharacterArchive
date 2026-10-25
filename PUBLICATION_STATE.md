@@ -1,5 +1,14 @@
 # Character Archive publication state
 
+## 2026-10-25 version 1.1.0.0
+
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.1.0.0
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.0/CharacterArchive-1.1.0.0.zip
+- ZIP: 98,064 bytes; SHA-256 `E66F4C3E27B40F58D77F377B318F200847D1F74FE90D879A8C0E9F2103D4B1E9`.
+- Added read-only main-scenario progress per character and fixed nine reviewed issue groups; see REVIEW_2026-10-25.md for reproductions, scope and remaining manual checks. Existing configuration schema and CSV columns retained.
+- Clean locked-dependency Release rebuild zero warnings/errors; existing core checks plus 43 persistence, 57 MSQ/review and 12 offline game-data checks passed. Four languages each contain 1,050 MSQs with the same graph endpoint. No live player data, installed DLL replacement or quest/server action used.
+- Published under the project-wide continuing publication authorization. Runtime integration, real Lodestone markup and seven-language visual acceptance remain unverified.
+
 ## 2026-10-23 version 1.0.0.2
 
 - Source: https://github.com/Roxyz0501/CharacterArchive

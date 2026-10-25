@@ -82,6 +82,7 @@ internal sealed class DeferredConfigurationStore<T> : IDisposable where T : clas
         {
             if (disposed || clock.GetElapsedTime(lastCheck) < TimeSpan.FromSeconds(60)) return;
             lastCheck = clock.GetTimestamp();
+            if (MaintenanceError is not null && !Stopped) PruneBackups();
             FlushUnsafe();
         }
     }
@@ -177,6 +178,7 @@ internal sealed class DeferredConfigurationStore<T> : IDisposable where T : clas
     {
         try
         {
+            fault?.Invoke("prune");
             foreach (var stale in Backups().Where(p => TryLoad(p, out _)).Skip(3)) File.Delete(stale);
             cleanupFailures = 0;
             MaintenanceError = null;

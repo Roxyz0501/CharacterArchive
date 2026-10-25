@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\CharacterArchive\Models\MainScenarioProgress.cs" Link="Models\MainScenarioProgress.cs" />
+    <Compile Include="..\CharacterArchive\Services\MainScenarioResolver.cs" Link="Services\MainScenarioResolver.cs" />
+    <Compile Include="..\CharacterArchive\Services\LocalizationService.cs" Link="Services\LocalizationService.cs" />
     <Compile Include="..\CharacterArchive\Configuration.cs" Link="Configuration.cs" />
     <Compile Include="..\CharacterArchive\Services\ConfigurationCodec.cs" Link="Services\ConfigurationCodec.cs" />
     <Compile Include="..\CharacterArchive\Services\DeferredConfigurationStore.cs" Link="Services\DeferredConfigurationStore.cs" />

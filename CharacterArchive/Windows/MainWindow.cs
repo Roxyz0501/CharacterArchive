@@ -19,6 +19,9 @@ public sealed class MainWindow : Window
     private readonly FileDialogManager fileDialogManager = new();
     private string statusMessage = string.Empty;
     private string batchLookupStatus = string.Empty;
+    private long snapshotRevision = -1;
+    private IReadOnlyList<CharacterRecord> snapshot = [];
+    private readonly HashSet<string> failedImages = new(StringComparer.OrdinalIgnoreCase);
 
     public MainWindow(Plugin plugin)
         : base("Character Archive##CharacterArchiveMain")
@@ -36,25 +39,30 @@ public sealed class MainWindow : Window
     private void DrawContents()
     {
         fileDialogManager.Draw();
-        var records = plugin.Repository.Snapshot();
+        if (snapshotRevision != plugin.Repository.Revision)
+        {
+            snapshot = plugin.Repository.Snapshot();
+            snapshotRevision = plugin.Repository.Revision;
+        }
+        var records = snapshot;
         DrawHeader(records.Count);
 
         if (!ImGui.BeginTabBar("CharacterArchiveTabs"))
             return;
 
-        if (ImGui.BeginTabItem(T("Character Overview", "キャラクター概要")))
+        if (ImGui.BeginTabItem($"{T("Character Overview", "キャラクター概要")}###Overview"))
         {
             DrawOverview(records);
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem(T("Character Details", "キャラクター詳細")))
+        if (ImGui.BeginTabItem($"{T("Character Details", "キャラクター詳細")}###Details"))
         {
             DrawDetails(records);
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem(T("Character File Mapping", "キャラファイル紐づけ")))
+        if (ImGui.BeginTabItem($"{T("Character File Mapping", "キャラファイル紐づけ")}###Mapping"))
         {
             DrawMapping(records);
             ImGui.EndTabItem();
@@ -72,7 +80,11 @@ public sealed class MainWindow : Window
         ImGui.EndTabBar();
     }
 
-    internal void SetLookupResult(ulong contentId, string message) => lookupResults[contentId] = message;
+    internal void SetLookupResult(ulong contentId, string message)
+    {
+        lookupResults[contentId] = message;
+        failedImages.Clear();
+    }
 
     internal void SetBatchLookupStatus(string message) => batchLookupStatus = message;
 
@@ -118,8 +130,8 @@ public sealed class MainWindow : Window
         }
 
         const ImGuiTableFlags flags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
-                                      ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY;
-        if (!ImGui.BeginTable("OverviewTable", 9, flags, new Vector2(0, -1)))
+                                      ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;
+        if (!ImGui.BeginTable("OverviewTable", 10, flags, new Vector2(0, -1)))
             return;
 
         ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale);
@@ -130,7 +142,9 @@ public sealed class MainWindow : Window
         ImGui.TableSetupColumn(T("Current Job", "カレントジョブ"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn("Lv", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 42 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Playtime", "プレイ時間"), ImGuiTableColumnFlags.WidthFixed, 125 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn(T("Last Login Detected", "最終ログイン検出"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("Main Scenario", "メインクエスト"), ImGuiTableColumnFlags.WidthFixed, 240 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("Last Detected", "最終検出"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupScrollFreeze(2, 1);
         ImGui.TableHeadersRow();
 
         foreach (var record in records)
@@ -145,6 +159,7 @@ public sealed class MainWindow : Window
             Cell(record.ClassJob);
             Cell(record.Level.ToString());
             Cell(PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
+            Cell(MainScenarioSummary(record.MainScenario));
             Cell(record.LastSeenAt.ToString("yyyy/MM/dd HH:mm:ss"));
         }
 
@@ -176,6 +191,7 @@ public sealed class MainWindow : Window
                     Detail(T("Race / Clan / Sex", "種族 / 部族 / 性別"), $"{record.Race} / {record.Tribe} / {record.Sex}");
                     Detail(T("Current Job / Level", "カレントジョブ / レベル"), $"{record.ClassJob} / {record.Level}");
                     Detail(T("Playtime", "プレイ時間"), PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
+                    Detail(T("Main Scenario", "メインクエスト"), MainScenarioSummary(record.MainScenario));
                     Detail(T("Grand Company", "グランドカンパニー"), EmptyAsDash(record.GrandCompany));
                     Detail(T("Guardian Deity", "守護神"), EmptyAsDash(record.GuardianDeity));
                     Detail(T("Starting City", "開始都市"), EmptyAsDash(record.StartTown));
@@ -189,6 +205,12 @@ public sealed class MainWindow : Window
             if (ImGui.BeginTabItem(T("Jobs", "ジョブ")))
             {
                 DrawJobs(record);
+                ImGui.EndTabItem();
+            }
+
+            if (ImGui.BeginTabItem($"{T("Main Scenario", "メインクエスト")}###MainScenario"))
+            {
+                DrawMainScenario(record);
                 ImGui.EndTabItem();
             }
 
@@ -221,7 +243,7 @@ public sealed class MainWindow : Window
 
             foreach (var record in records)
             {
-                ImGui.PushID(unchecked((int)record.ContentId));
+                ImGui.PushID($"CID{record.ContentId:X16}");
                 ImGui.TableNextRow();
                 Cell(record.CharacterName);
                 Cell(record.HomeWorld);
@@ -257,7 +279,7 @@ public sealed class MainWindow : Window
                 T("CSV file{.csv}", "CSVファイル{.csv}"),
                 defaultName,
                 ".csv",
-                (success, path) => ExportCsv(records, success, path),
+                (success, path) => ExportCsv(plugin.Repository.Snapshot(), success, path),
                 plugin.Configuration.CsvExportDirectory,
                 true);
         }
@@ -406,24 +428,63 @@ public sealed class MainWindow : Window
     {
         ImGui.TableNextRow();
         Cell(label);
-        Cell(value);
+        ImGui.TableNextColumn();
+        ImGui.TextWrapped(EmptyAsDash(value));
     }
 
     private static string EmptyAsDash(string value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
-    private static void DrawFaceIcon(CharacterRecord record)
+    private void DrawFaceIcon(CharacterRecord record)
     {
-        if (!record.ProfileImageIsFace || string.IsNullOrWhiteSpace(record.ProfileImagePath) || !File.Exists(record.ProfileImagePath))
+        if (!record.ProfileImageIsFace || string.IsNullOrWhiteSpace(record.ProfileImagePath) || failedImages.Contains(record.ProfileImagePath))
         {
             ImGui.Dummy(new Vector2(42, 42) * ImGuiHelpers.GlobalScale);
             return;
         }
 
-        var texture = Plugin.TextureProvider.GetFromFile(record.ProfileImagePath).GetWrapOrDefault();
+        Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture;
+        try { texture = Plugin.TextureProvider.GetFromFile(record.ProfileImagePath).GetWrapOrDefault(); }
+        catch
+        {
+            failedImages.Add(record.ProfileImagePath);
+            ImGui.Dummy(new Vector2(42, 42) * ImGuiHelpers.GlobalScale);
+            return;
+        }
         if (texture is null)
             ImGui.Dummy(new Vector2(42, 42) * ImGuiHelpers.GlobalScale);
         else
             ImGui.Image(texture.Handle, new Vector2(42, 42) * ImGuiHelpers.GlobalScale);
+    }
+
+    private string MainScenarioSummary(MainScenarioProgress? progress) => progress is null
+        ? T("Not acquired", "未取得")
+        : $"{MainScenarioState(progress.Status)}: {progress.QuestName}";
+
+    private string MainScenarioState(MainScenarioStatus status) => status switch
+    {
+        MainScenarioStatus.InProgress => T("In progress", "受注中"),
+        MainScenarioStatus.Available => T("Not accepted", "未受注"),
+        MainScenarioStatus.LastCompleted => T("Last completed", "直前にクリア"),
+        MainScenarioStatus.UpToDate => T("Latest available story completed", "現在の最終クエストまで完了"),
+        _ => T("Not acquired", "未取得"),
+    };
+
+    private void DrawMainScenario(CharacterRecord record)
+    {
+        if (record.MainScenario is not { } progress)
+            ImGui.TextWrapped(T("Not acquired", "未取得"));
+        else if (ImGui.BeginTable($"MainScenario{record.ContentId}", 2, ImGuiTableFlags.BordersInnerH))
+        {
+            Detail(T("Status", "状態"), MainScenarioState(progress.Status));
+            Detail(T("Quest", "クエスト"), progress.QuestName);
+            Detail(T("Chapter", "章"), progress.Chapter);
+            Detail(T("Quest ID", "クエストID"), progress.QuestId.ToString());
+            Detail(T("Quest sequence", "クエスト内部進行値"), progress.Sequence?.ToString() ?? "—");
+            Detail(T("Last Detected", "最終検出"), progress.ObservedAt.ToString("yyyy/MM/dd HH:mm:ss"));
+            ImGui.EndTable();
+        }
+        ImGui.TextWrapped(T("Reads received game data every 10 seconds while logged in. Offline characters show the last saved observation. Quest sequence is not a percentage.",
+            "ログイン中は受信済みのゲーム情報を10秒ごとに読み取ります。未ログインのキャラクターは最後の記録を表示します。内部進行値は進捗率ではありません。"));
     }
 
     private void DrawJobs(CharacterRecord record)

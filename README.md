@@ -6,6 +6,7 @@ Character Archive is a character-information manager for XIVLauncher / Dalamud, 
 
 ## Features
 
+- Displays the selected main-scenario quest, chapter, acceptance state and internal quest sequence, with the last saved observation retained for offline characters.
 - Records character name, home/current world, Content ID, race, clan, gender, current job and level, and all class/job levels.
 - Resolves the matching `FFXIV_CHR...` configuration folder from the Content ID (read-only).
 - Records the game’s standard `/playtime` response and displays it as `12d 3h 45m` or `00291:45:00`.
@@ -56,15 +57,23 @@ Dalamud and FFXIVClientStructs are supplied by the runtime. See [THIRD_PARTY_NOT
 
 ## Data and privacy
 
-The plugin configuration stores Content IDs, character names, worlds, Lodestone IDs, job levels, playtime, FFXIV configuration-folder names/paths, timestamps, and UI language. Typical locations are:
+The plugin configuration stores Content IDs, character names, worlds, Lodestone IDs, job levels, playtime, FFXIV configuration-folder names/paths, timestamps, main-scenario quest IDs/names/chapters/states/sequences, and UI language. Typical locations are:
 
 - Configuration: `%APPDATA%\XIVLauncher\pluginConfigs\CharacterArchive.json`
 - Face-image cache and default CSV folder: `%APPDATA%\XIVLauncher\pluginConfigs\CharacterArchive\`
 - CSV: the location explicitly chosen by the user
 
-FFXIV folders are checked read-only. Lodestone HTTPS requests occur only after an explicit lookup or when automatic lookup is enabled. They send character name and home world to official `*.finalfantasyxiv.com` endpoints and retrieve public Lodestone IDs and face images. Content IDs, local paths, jobs, playtime, and CSV data are not sent. Batch lookup is serial with a one-second delay; timeout is 20 seconds, and images are restricted to official HTTPS hosts and 5 MB.
+FFXIV folders are checked read-only. Lodestone HTTPS requests occur only after an explicit lookup or when automatic lookup is enabled. They send character name and home world to official `*.finalfantasyxiv.com` endpoints and retrieve public Lodestone IDs and face images. Content IDs, local paths, jobs, playtime, main-scenario progress and CSV data are not sent. Lookups require an exact name/world match in both search and profile data; ambiguous or changed markup is not guessed. All Lodestone HTTP requests (including redirects and images) are serial and spaced at least one second apart. Logical operations have a 20-second deadline; HTML is bounded to 2 MiB and images to 5 MiB. Redirects are restricted to official HTTPS hosts.
 
 The plugin itself does not contact Ko-fi. The browser opens `https://ko-fi.com/roxyz0501` only after the support button is clicked.
+
+## Main scenario progress
+
+The overview includes a Main Scenario column. Each character's Details also has a Main Scenario tab with the quest name/ID, chapter, state, internal quest sequence and last changed observation time. States distinguish In progress, Not accepted, Last completed, and Latest available story completed. A sequence is an internal game value, not a completion percentage.
+
+After a short login readiness period, the plugin checks already-received client state every 10 seconds while logged in; Refresh Current Character also refreshes it. It reads the scenario guide and accepted/completed quest state only, without quest commands, UI automation or new server requests. It does not query offline characters. Game-provided quest/chapter names use the client's data language; the seven-language interface does not translate unavailable game data.
+
+Completion is claimed only when a unique endpoint derived from the installed main-scenario quest graph is confirmed complete. Empty/unavailable guide data does not imply completion. Unavailable observations preserve existing data; the displayed time identifies the last changed recorded state. A new patch can change the endpoint. Internal guide structures can be affected by game updates; actual in-game acceptance remains unverified.
 
 ## Saving and recovery
 
@@ -84,8 +93,11 @@ Character records are current snapshots, not an append-only event history. No da
 - Korean, Simplified Chinese, and Traditional Chinese glyph coverage depends on the active Dalamud font atlas; in-game visual acceptance is required before publication.
 - Users are responsible for checking current FFXIV, XIVLauncher, and Dalamud policies.
 
+See [the 1.1.0.0 review](REVIEW_2026-10-25.md) for reproduced fixes, test coverage and remaining checks.
+
 ## Troubleshooting
 
+- If main-scenario progress is missing, wait until login has finished and use Refresh Current Character. Offline records are not live; unavailable data does not clear an existing observation.
 - For a missing face image, retry individual/batch Lodestone lookup and confirm the profile is public.
 - If `/playtime` is unavailable at login, increase the post-unlock delay or refresh manually after login.
 - If the language is wrong, choose one of the seven named languages in the Language settings tab; that choice persists.
@@ -104,12 +116,13 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The release package is `artifacts\CharacterArchive-1.0.0.2.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.1.0.0.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 
 - **BetterPlaytime**, by Infi, [repository](https://github.com/caitlyn-gg/BetterPlaytime), MIT License. Character Archive references its approach of invoking standard `/playtime` and observing `UIModule.PrintPlayTime` for minute-based playtime. Related code is in `GameChatCommandService.cs` and playtime response handling in `Plugin.cs`.
-- **FFXIVClientStructs**, by aers and contributors, [repository](https://github.com/aers/FFXIVClientStructs), MIT License. Character Archive uses runtime public APIs including `UIModule`, `RaptureShellModule`, and `Utf8String`; it does not redistribute its binary or source.
+- **Questionable**, by the Puni.sh Quest Squad, [repository](https://github.com/PunishXIV/Questionable), GNU AGPL v3 (upstream license). Its `QuestInfo` classification was consulted for the game-data `JournalGenre.Icon == 61412` main-scenario discriminator, then independently checked against installed game data. No Questionable code, quest scripts or assets are copied or redistributed; it is not a dependency.
+- **FFXIVClientStructs**, by aers and contributors, [repository](https://github.com/aers/FFXIVClientStructs), MIT License. Character Archive uses runtime public APIs including `UIModule`, `RaptureShellModule`, `Utf8String`, `QuestManager`, and `AgentScenarioTree`; it does not redistribute its binary or source.
 
 Required notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Third-party work is not represented as work authored by Roxyz0501.
 
