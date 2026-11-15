@@ -2,6 +2,8 @@
 
 ## 2026-11-16 version 1.1.0.1
 
+- Source/tag: `8dff7f414263aae5b162da4d066d48b76f921877`; public repository/icon/ZIP verified. Shared index `df0bf840f2b125e0c430e9d85b624110f0b67560`, pinned and normal raw URLs verified 1.1.0.1; all 16 other entries unchanged.
+
 - Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.1.0.1
 - ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.1/CharacterArchive-1.1.0.1.zip
 - ZIP 99,119 bytes; SHA-256 `61D1A2FF7E80314CD36785F5872E4D2D2D12E2004684E8A3AF86AD1586703527`.
