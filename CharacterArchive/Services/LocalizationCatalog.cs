@@ -9,6 +9,7 @@ public static partial class LocalizationCatalog
 
     private static readonly IReadOnlyDictionary<string, Entry> Entries = new Dictionary<string, Entry>(StringComparer.Ordinal)
     {
+        ["Playtime acquisition is unavailable. Reload the plugin to retry."] = new("プレイ時間の取得を利用できません。プラグインを再読み込みして再試行してください。", "Die Spielzeiterfassung ist nicht verfügbar. Lade das Plugin zum Wiederholen neu.", "L’acquisition du temps de jeu est indisponible. Rechargez le plugin pour réessayer.", "플레이 시간을 수집할 수 없습니다. 플러그인을 다시 로드하여 재시도하세요.", "无法获取游戏时间。请重新加载插件重试。", "無法取得遊玩時間。請重新載入外掛重試。"),
         ["Main Scenario"] = new("メインクエスト", "Hauptszenario", "Épopée", "주요 퀘스트", "主线任务", "主線任務"),
         ["Not acquired"] = new("未取得", "Nicht erfasst", "Non acquis", "미취득", "未获取", "未取得"),
         ["In progress"] = new("受注中", "In Bearbeitung", "En cours", "진행 중", "进行中", "進行中"),

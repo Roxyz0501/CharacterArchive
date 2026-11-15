@@ -1,5 +1,13 @@
 # Character Archive publication state
 
+## 2026-11-16 version 1.1.0.1
+
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.1.0.1
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.1/CharacterArchive-1.1.0.1.zip
+- ZIP 99,119 bytes; SHA-256 `61D1A2FF7E80314CD36785F5872E4D2D2D12E2004684E8A3AF86AD1586703527`.
+- Log-confirmed installation failure originated in mandatory inline playtime hook creation, not ZIP extraction. Uses the supported virtual-table pointer hook and isolates optional playtime initialization failure so other features load. No command is issued when acquisition is unavailable; stored data retained.
+- Clean locked-dependency Release rebuild zero warnings/errors; nine new optional-resource checks plus 43 persistence, 57 review and all existing core/UI-localization checks passed. See INSTALLATION_FIX_2026-11-16.md. Native installation/hook activation in the live game is not yet verified; no installed DLL or production configuration was replaced.
+
 ## 2026-10-25 version 1.1.0.0
 
 - Source/tag: `05c7e16bc9ce5b2e6dfa4265cd4c9182debbd3eb`. Public repository/release/icon HTTP200 (image/png); anonymous ZIP hash, four-file allowlist and manifest version/API15/Author/RepoUrl/IconUrl verified.

@@ -99,6 +99,10 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 
 ## トラブルシューティング
 
+- 1.1.0.0でインストール失敗として表示される起動時エラーを1.1.0.1で修正しました。プラグイン一覧を更新してインストールを再試行してください。設定ファイルは削除しないでください。
+- プレイ時間取得を初期化できなくても他の機能は利用でき、設定画面に案内を表示します。再試行はプラグインの再読み込みで行い、保存済みのプレイ時間は保持します。
+
+
 - メインクエストが未取得の場合はログイン完了を待って「現在のキャラクターを再取得」を押してください。未ログインの記録はリアルタイムではなく、取得不能時も既存の記録は消しません。
 - 顔画像がない場合は個別／まとめ検索を再実行し、公開プロフィールを確認してください。
 - ログイン直後に`/playtime`が使えない場合は待機秒数を増やすか、ログイン完了後に手動再取得してください。
@@ -118,7 +122,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.1.0.0.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.1.0.1.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者参照・帰属
 

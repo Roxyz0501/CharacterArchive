@@ -96,7 +96,9 @@ public sealed class MainWindow : Window
             plugin.CaptureCurrentCharacter(retry: true);
         ImGui.SameLine();
         if (ImGui.Button(T("Refresh ptime", "ptime再取得")))
-            statusMessage = plugin.RequestPlayTime()
+            statusMessage = !plugin.PlayTimeAvailable
+                ? T("Playtime acquisition is unavailable. Reload the plugin to retry.", "プレイ時間の取得を利用できません。プラグインを再読み込みして再試行してください。")
+                : plugin.RequestPlayTime()
                 ? T("Requested ptime", "ptimeを照会しました")
                 : T("Could not request ptime (wait 10 seconds between requests)", "ptimeを照会できませんでした（連続実行は10秒待機）");
         if (!string.IsNullOrWhiteSpace(statusMessage))
@@ -291,6 +293,9 @@ public sealed class MainWindow : Window
 
     private void DrawSettings()
     {
+        if (!plugin.PlayTimeAvailable)
+            ImGui.TextWrapped(T("Playtime acquisition is unavailable. Reload the plugin to retry.",
+                "プレイ時間の取得を利用できません。プラグインを再読み込みして再試行してください。"));
         ImGui.TextWrapped(T("Changes are saved every 60 seconds and on logout or normal shutdown.",
             "変更は60秒ごとと、ログアウト・正常終了時に保存されます。"));
         if (plugin.ConfigurationRecovered)

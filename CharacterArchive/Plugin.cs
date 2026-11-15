@@ -40,7 +40,9 @@ public sealed class Plugin : IDalamudPlugin
     internal bool RecoveryBlocked => storage.RecoveryBlocked;
     internal bool ConfigurationRecovered => storage.Recovered;
     private int batchLookupRunning;
-    private readonly Hook<UIModule.Delegates.HandlePacket> playTimeHook;
+    private readonly OptionalResource<Hook<UIModule.Delegates.HandlePacket>> playTimeHook = new();
+    private UIModule.Delegates.HandlePacket? playTimeOriginal;
+    internal bool PlayTimeAvailable => playTimeHook.Value?.IsEnabled == true;
     private bool pendingPlayTimeRequest;
     private DateTime playTimeRequestAfter = DateTime.MinValue;
     private DateTime playTimeCommandReadySince = DateTime.MinValue;
@@ -90,10 +92,12 @@ public sealed class Plugin : IDalamudPlugin
         storage.OnStopped = () => Chat.PrintError(Localizer.Text(
             "Saving stopped after three failures. Open Settings and retry saving.",
             "保存が3回失敗したため停止しました。設定から保存を再試行してください。"));
-        playTimeHook = GameInteropProvider.HookFromAddress<UIModule.Delegates.HandlePacket>(
-            UIModule.StaticVirtualTablePointer->HandlePacket,
-            OnUiModulePacket);
-        playTimeHook.Enable();
+        // Hook the virtual-table slot rather than allocating an inline reverse wrapper near the target.
+        playTimeHook.Initialize(
+            () => GameInteropProvider.HookFromFunctionPointerVariable<UIModule.Delegates.HandlePacket>(
+                (nint)(&UIModule.StaticVirtualTablePointer->HandlePacket), OnUiModulePacket),
+            hook => { playTimeOriginal = hook.Original; hook.Enable(); },
+            ex => Log.Warning(ex, "Playtime capture is unavailable; other features remain enabled."));
         mainWindow = new MainWindow(this);
         windowSystem.AddWindow(mainWindow);
 
@@ -114,7 +118,7 @@ public sealed class Plugin : IDalamudPlugin
         if (ClientState.IsLoggedIn)
         {
             pendingLoginCapture = true;
-            pendingPlayTimeRequest = Configuration.AutoRequestPlayTimeOnLogin;
+            pendingPlayTimeRequest = Configuration.AutoRequestPlayTimeOnLogin && PlayTimeAvailable;
             playTimeRequestAfter = DateTime.UtcNow;
             if (PlayerState.IsLoaded)
                 CaptureCurrentCharacter();
@@ -159,7 +163,7 @@ public sealed class Plugin : IDalamudPlugin
 
     internal bool RequestPlayTime(bool retry = true)
     {
-        if (disposed || !ClientState.IsLoggedIn || !PlayerState.IsLoaded)
+        if (disposed || !PlayTimeAvailable || !ClientState.IsLoggedIn || !PlayerState.IsLoaded)
             return false;
 
         if (DateTime.UtcNow - lastPlayTimeRequest < TimeSpan.FromSeconds(10))
@@ -191,14 +195,15 @@ public sealed class Plugin : IDalamudPlugin
         playTimeRetry.Reset();
         Configuration.AutoRequestPlayTimeOnLogin = enabled;
         Repository.SaveSettings();
-        pendingPlayTimeRequest = enabled && ClientState.IsLoggedIn;
+        pendingPlayTimeRequest = enabled && ClientState.IsLoggedIn && PlayTimeAvailable;
         playTimeRequestAfter = DateTime.UtcNow;
         playTimeCommandReadySince = DateTime.MinValue;
     }
 
     private unsafe void OnUiModulePacket(UIModule* thisPtr, UIModulePacketType type, uint uintParam, void* packet)
     {
-        playTimeHook.Original(thisPtr, type, uintParam, packet);
+        // Keep the original delegate valid even if an already-entered callback overlaps disposal.
+        playTimeOriginal!(thisPtr, type, uintParam, packet);
 
         if (disposed || type != UIModulePacketType.PrintPlayTime || packet is null || !PlayerState.IsLoaded)
             return;
@@ -454,7 +459,7 @@ public sealed class Plugin : IDalamudPlugin
         mainScenarioSessionStartedAt = TimeProvider.System.GetTimestamp();
         pendingLoginCapture = !captureRetry.Stopped;
         automaticLookups.Clear();
-        pendingPlayTimeRequest = Configuration.AutoRequestPlayTimeOnLogin && !playTimeRetry.Stopped;
+        pendingPlayTimeRequest = Configuration.AutoRequestPlayTimeOnLogin && PlayTimeAvailable && !playTimeRetry.Stopped;
         playTimeRequestAfter = DateTime.UtcNow;
         playTimeCommandReadySince = DateTime.MinValue;
         CaptureCurrentCharacter();

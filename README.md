@@ -97,6 +97,10 @@ See [the 1.1.0.0 review](REVIEW_2026-10-25.md) for reproduced fixes, test covera
 
 ## Troubleshooting
 
+- Version 1.1.0.1 fixes startup failures that could appear as installation failures in 1.1.0.0. Update the plugin list and retry installation. Keep your configuration files.
+- If playtime acquisition cannot initialize, other features remain usable and Settings shows a warning. Reload the plugin to retry; existing saved playtime is retained.
+
+
 - If main-scenario progress is missing, wait until login has finished and use Refresh Current Character. Offline records are not live; unavailable data does not clear an existing observation.
 - For a missing face image, retry individual/batch Lodestone lookup and confirm the profile is public.
 - If `/playtime` is unavailable at login, increase the post-unlock delay or refresh manually after login.
@@ -116,7 +120,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The release package is `artifacts\CharacterArchive-1.1.0.0.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.1.0.1.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party references and attribution
 
