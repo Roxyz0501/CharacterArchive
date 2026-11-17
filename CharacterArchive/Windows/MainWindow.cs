@@ -172,6 +172,7 @@ public sealed class MainWindow : Window
             Cell(record.ClassJob);
             Cell(record.Level.ToString());
             Cell(PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
+            DrawAlternatePlaytime(record.PlayTimeMinutes);
             Cell(MainScenarioSummary(record.MainScenario));
             Cell(record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
             ProgressCell(FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns), record.MainScenario?.ExpansionProgress?.AllCampaigns);
@@ -208,6 +209,7 @@ public sealed class MainWindow : Window
                     Detail(T("Race / Clan / Sex", "種族 / 部族 / 性別"), $"{record.Race} / {record.Tribe} / {record.Sex}");
                     Detail(T("Current Job / Level", "カレントジョブ / レベル"), $"{record.ClassJob} / {record.Level}");
                     Detail(T("Playtime", "プレイ時間"), PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
+                    DrawAlternatePlaytime(record.PlayTimeMinutes);
                     Detail(T("Main Scenario", "メインクエスト"), MainScenarioSummary(record.MainScenario));
                     Detail(T("Expansion", "拡張"), record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
                     ProgressDetail(T("MSQ total", "メイン全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns, true), record.MainScenario?.ExpansionProgress?.AllCampaigns);
@@ -433,6 +435,14 @@ public sealed class MainWindow : Window
         statusMessage = string.Empty;
         batchLookupStatus = string.Empty;
         lookupResults.Clear();
+    }
+
+    private void DrawAlternatePlaytime(uint? minutes)
+    {
+        if (minutes is null || !ImGui.IsItemHovered()) return;
+        var alternate = plugin.Configuration.PlayTimeDisplayMode == PlayTimeDisplayMode.TotalHours
+            ? PlayTimeDisplayMode.GameStyle : PlayTimeDisplayMode.TotalHours;
+        ImGui.SetTooltip(PlayTimeFormatter.Format(minutes, alternate, plugin.Localizer.Current));
     }
 
     private static void ProgressDetail(string label, string value, QuestCompletion? progress)
