@@ -103,7 +103,7 @@ See [the 1.1.0.0 review](REVIEW_2026-10-25.md) for reproduced fixes, test covera
 
 ## Troubleshooting
 
-- Update to 1.3.0.0 and restart FFXIV if a previous version crashed during housing entry or zone transitions. Existing saved information is retained.
+- Update to 1.4.0.0 and restart FFXIV if a previous version crashed during housing entry or zone transitions. Existing saved information is retained.
 - Playtime is recorded from the standard game response. Normal chat text and other players' messages are not recorded.
 
 
@@ -130,7 +130,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The release package is `artifacts\CharacterArchive-1.3.0.0.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.4.0.0.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
 ## Third-party licenses
 

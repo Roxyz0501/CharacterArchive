@@ -30,6 +30,15 @@ internal static class CompletionTests
         Check(result.Overall == new QuestCompletion(3, 7) && result.Overall.Percent == 42.8m, "expansion count excludes alternate city and includes both AND branches plus patches");
         Check(result.BaseCampaign == new QuestCompletion(3, 5) && result.BaseCampaign.Percent == 60m, ".0 excludes patch chapters without excluding required parallel routes");
         var priorReads = reads;
+        Check(result.Patch == "2.0" && result.PatchProgress == result.BaseCampaign, "launch progress is labeled with the current launch patch");
+        var patchRows = new[] { 5200u, 5244u, 5245u, 5299u }.Select((id, i) =>
+            new MainScenarioQuest(id + 65536, "Fixture", "Chapter", i == 0 ? [] : [65536u + new[] { 5200u, 5244u, 5245u }[i - 1]],
+                5, "Dawntrail", i == 0 ? 1u : 2u)).ToDictionary(q => q.Id);
+        var patchCalc = new MainScenarioCompletionCalculator(patchRows);
+        var middle = patchCalc.Calculate(1, current with { QuestId = 65536 + 5245 }, [1], id => id == 65536 + 5244)!;
+        Check(middle.Patch == "7.1" && middle.PatchProgress == new QuestCompletion(1, 2), "7.1 denominator excludes launch and 7.2 even with shared journal genre");
+        var following = patchCalc.Calculate(1, current with { QuestId = 65536 + 5299 }, [1], id => id < 65536 + 5299)!;
+        Check(following.Patch == "7.2" && following.PatchProgress?.Percent == 0, "first quest in the next patch resets patch progress");
         var same = calculator.Calculate(1, current, new byte[] { 1 }, Completed);
         Check(ReferenceEquals(result, same) && reads == priorReads, "unchanged flags/current quest cause zero completion API reads");
         Check(reads <= quests.Count, "all scopes share memoized completion reads");

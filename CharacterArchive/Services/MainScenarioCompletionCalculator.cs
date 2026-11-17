@@ -25,11 +25,19 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
             if (!memo.TryGetValue(id, out var result)) memo[id] = result = completed(id);
             return result;
         }
+        var launch = GetScope(current.ExpansionId, true);
+        var isLaunch = launch.ContainsKey(current.Id);
+        var patch = isLaunch ? $"{current.ExpansionId + 2}.0" : PatchFor(current.Id);
+        var launchProgress = Count(launch, current.Id, IsCompleted);
         cached = new(current.ExpansionId, current.ExpansionName,
             Count(GetScope(current.ExpansionId, false), progress.QuestId, IsCompleted),
-            Count(GetScope(current.ExpansionId, true), progress.QuestId, IsCompleted))
+            launchProgress)
         {
             AllCampaigns = Count(all, progress.QuestId, IsCompleted, progress.Status == MainScenarioStatus.InProgress),
+            Patch = patch,
+            PatchProgress = isLaunch ? launchProgress : patch is null ? null : Count(
+                GetScope(current.ExpansionId, false).Values.Where(q => PatchFor(q.Id) == patch).ToDictionary(q => q.Id),
+                current.Id, IsCompleted, progress.Status == MainScenarioStatus.InProgress),
         };
         cachedActive = progress.Status == MainScenarioStatus.InProgress;
         cachedContentId = contentId;
@@ -37,6 +45,48 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
         cachedFlags = completionFlags.ToArray();
         return cached;
     }
+
+    // Low 16 bits of the game's MSQ row ID, not localized titles or journal genre order.
+    private static string? PatchFor(uint id) => (id & 0xffff) switch
+    {
+        1175 or (>= 1189 and <= 1192) or (>= 3874 and <= 3878) => "2.1",
+        (>= 1346 and <= 1347) or 1352 or 1356 or (>= 1358 and <= 1363) or (>= 3879 and <= 3882) => "2.2",
+        (>= 1442 and <= 1443) or (>= 1446 and <= 1448) or 1453 or (>= 1456 and <= 1460) or (>= 3883 and <= 3885) => "2.3",
+        (>= 52 and <= 54) or 57 or 62 or 69 or (>= 74 and <= 75) or (>= 77 and <= 78) or 82 or 84 or (>= 86 and <= 89) or (>= 3886 and <= 3887) => "2.4",
+        (>= 363 and <= 366) or (>= 368 and <= 369) or 429 or 3888 => "2.5",
+        (>= 370 and <= 373) or 391 or 418 or (>= 420 and <= 428) or 4591 => "2.55",
+        (>= 2156 and <= 2163) => "3.1",
+        (>= 2231 and <= 2241) => "3.2",
+        (>= 2242 and <= 2247) => "3.3",
+        (>= 2341 and <= 2350) => "3.4",
+        (>= 2351 and <= 2355) => "3.5",
+        (>= 2356 and <= 2359) => "3.56",
+        (>= 2962 and <= 2972) => "4.1",
+        (>= 3022 and <= 3029) => "4.2",
+        (>= 3070 and <= 3076) => "4.3",
+        (>= 3143 and <= 3149) => "4.4",
+        (>= 3179 and <= 3183) => "4.5",
+        (>= 3184 and <= 3185) => "4.56",
+        (>= 3673 and <= 3682) => "5.1",
+        (>= 3761 and <= 3770) => "5.2",
+        (>= 3771 and <= 3782) => "5.3",
+        (>= 4007 and <= 4016) => "5.4",
+        (>= 4058 and <= 4063) => "5.5",
+        (>= 4064 and <= 4066) => "5.55",
+        (>= 4526 and <= 4535) => "6.1",
+        (>= 4592 and <= 4600) => "6.2",
+        (>= 4670 and <= 4678) => "6.3",
+        (>= 4735 and <= 4743) => "6.4",
+        (>= 4744 and <= 4750) => "6.5",
+        (>= 4751 and <= 4753) => "6.55",
+        (>= 5244 and <= 5250) => "7.1",
+        (>= 5299 and <= 5306) => "7.2",
+        (>= 5364 and <= 5373) => "7.3",
+        (>= 5426 and <= 5434) => "7.4",
+        (>= 5470 and <= 5474) => "7.5",
+        (>= 5475 and <= 5478) => "7.56",
+        _ => null,
+    };
 
     private Dictionary<uint, MainScenarioQuest> GetScope(uint expansion, bool baseCampaign)
     {

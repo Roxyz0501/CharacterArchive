@@ -11,6 +11,8 @@ public sealed record MainScenarioProgress(uint QuestId, string QuestName, string
 public sealed record MainScenarioExpansion(uint Id, string Name, QuestCompletion? Overall, QuestCompletion? BaseCampaign)
 {
     public QuestCompletion? AllCampaigns { get; init; }
+    public string? Patch { get; init; }
+    public QuestCompletion? PatchProgress { get; init; }
 }
 
 public sealed record QuestCompletion(int Completed, int Total, bool MilestoneOnly = false)
