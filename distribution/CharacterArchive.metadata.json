@@ -2,15 +2,15 @@
   "Author": "Roxyz0501",
   "Name": "Character Archive",
   "InternalName": "CharacterArchive",
-  "AssemblyVersion": "1.1.0.1",
+  "AssemblyVersion": "1.2.0.0",
   "Punchline": "Manage characters, jobs, playtime, Lodestone profiles, and configuration folders.",
   "Description": "Stores logged-in character details, jobs, playtime, Lodestone IDs, and configuration-folder mappings locally, then presents them in a searchable UI and CSV export. Optional external lookup and login-time playtime acquisition require explicit settings.",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "RepoUrl": "https://github.com/Roxyz0501/CharacterArchive",
   "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/CharacterArchive/main/CharacterArchive/images/icon.png",
-  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.1/CharacterArchive-1.1.0.1.zip",
-  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.1.0.1/CharacterArchive-1.1.0.1.zip",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.2.0.0/CharacterArchive-1.2.0.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.2.0.0/CharacterArchive-1.2.0.0.zip",
   "Tags": [
     "character",
     "config",
@@ -19,6 +19,6 @@
     "playtime"
   ],
   "RequiredPlugins": [],
-  "ReleaseArtifact": "CharacterArchive-1.1.0.1.zip",
-  "Changelog": "Fixes installation/startup failures during playtime initialization. Character information, main-scenario progress and CSV remain available if playtime acquisition cannot initialize."
+  "ReleaseArtifact": "CharacterArchive-1.2.0.0.zip",
+  "Changelog": "Shows the current main-scenario expansion and separate completion percentages for the full expansion and its .0 launch story. Counts completed required quests on the selected route; patch chapters and unavailable observations are handled separately."
 }

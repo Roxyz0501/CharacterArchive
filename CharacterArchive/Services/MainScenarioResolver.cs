@@ -2,7 +2,8 @@ using CharacterArchive.Models;
 
 namespace CharacterArchive.Services;
 
-internal sealed record MainScenarioQuest(uint Id, string Name, string Chapter, uint[] PreviousIds);
+internal sealed record MainScenarioQuest(uint Id, string Name, string Chapter, uint[] PreviousIds,
+    uint ExpansionId = 0, string ExpansionName = "", uint GenreId = 0, byte PreviousJoin = 1);
 
 /// <summary>Pure interpretation of received guide/quest state. Zero guide IDs never imply completion.</summary>
 internal static class MainScenarioResolver

@@ -5,6 +5,7 @@ using CharacterArchive.Services;
 
 var failures = new List<string>();
 OptionalResourceTests.Run(failures);
+CompletionTests.Run(failures);
 
 var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
 var mainWindowSource = File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Windows", "MainWindow.cs"));

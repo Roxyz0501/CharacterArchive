@@ -7,6 +7,7 @@
     <DalamudLibPath Condition="'$(DalamudLibPath)' == ''">$(APPDATA)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\CharacterArchive\Services\MainScenarioCompletionCalculator.cs" Link="MainScenarioCompletionCalculator.cs" />
     <Reference Include="Lumina"><HintPath>$(DalamudLibPath)Lumina.dll</HintPath></Reference>
     <Reference Include="Lumina.Excel"><HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath></Reference>
     <Compile Include="..\CharacterArchive\Models\MainScenarioProgress.cs" Link="MainScenarioProgress.cs" />

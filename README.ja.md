@@ -77,6 +77,12 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 
 「現在の最終クエストまで完了」は、インストール済みのメインクエスト定義から一意に特定した終端クエストがクリア済みの場合だけ表示します。ガイドが空・未読込という理由では完了と判定しません。取得不能時は既存の記録を保持し、日時は最後に状態が変わった記録時点を示します。パッチで終端が変わる場合があります。ゲーム更新による内部構造の変化と、実ゲームでの表示・取得は別途確認が必要です。
 
+### 拡張ごとの進捗率
+
+概要とキャラクター詳細に拡張名と2つの進捗率を表示します。**拡張全体**はインストール済みの後続パッチを含む範囲、**.0本編**はその拡張の発売時の章です。キャラクターのルート上で必要なメインクエストの完了件数を使い、所要時間やクエスト内部進行値とは区別します。開始都市などの選択しなかったルートは除外し、両方必要な並行ルートは含めます。対象範囲の終端クエストがクリア済みなら、クエスト定義の改編後でも100%と判定します。件数を復元できる場合は詳細に件数も表示し、ルート未確定時は率を推測せず「未取得」と表示します。
+
+小数第1位まで表示し、未完了の状態を丸めて100%にはしません。インストール済みのクエスト定義が基準なので、今後のパッチで拡張全体の分母が増える場合があります。拡張名は記録したガイドのクエスト（または最終クリア済みクエスト）が属する拡張であり、アカウントが所有する最新拡張ではありません。保存済みの未ログイン記録は、ログイン・再取得で追加項目を取得します。追加のサーバー照会は行わず、受信済みのクリア情報が変わらなければ計算結果を再利用します。
+
 ## 保存・復旧
 
 設定・キャラクター情報はメモリへ即時反映し、共通の60秒スケジューラーで変更がある場合だけ保存します。変更なし、または保存前に元の値へ戻した場合は書き込みません。ログアウト・ゲーム正常終了・プラグイン無効化時には未保存分を保存します（保存失敗による停止中を除く）。強制終了では未保存期間（通常最大約60秒分）が失われる可能性があり、バックアップでも復元できません。
@@ -122,15 +128,11 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.1.0.1.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.2.0.0.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
-## 第三者参照・帰属
+## 第三者ライセンス
 
-- **BetterPlaytime** — 作者Infi、[リポジトリ](https://github.com/caitlyn-gg/BetterPlaytime)、MIT License。標準`/playtime`をテキストコマンド経路で実行し、`UIModule.PrintPlayTime`応答から分単位ptimeを取得する考え方を参考にしています。該当箇所は`GameChatCommandService.cs`と`Plugin.cs`のptime応答処理です。
-- **Questionable** — the Puni.sh Quest Squad、[リポジトリ](https://github.com/PunishXIV/Questionable)、GNU AGPL v3（上流LICENSE参照）。`QuestInfo`のゲームデータ上のメインクエスト判別値（`JournalGenre.Icon == 61412`）を参考情報として確認し、インストール済みデータで独立に検証しました。Questionableのコード・クエストスクリプト・アセットはコピー・再配布せず、依存プラグインでもありません。
-- **FFXIVClientStructs** — aersおよびコントリビューター、[リポジトリ](https://github.com/aers/FFXIVClientStructs)、MIT License。実行環境提供の`UIModule`、`RaptureShellModule`、`Utf8String`、`QuestManager`、`AgentScenarioTree`等の公開型・APIを利用し、バイナリやソースは同梱しません。
-
-必要な表示は[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に収録しています。第三者の成果をRoxyz0501の作成物として扱いません。
+必要な著作権表示・ライセンス本文は[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に収録しています。
 
 ## ライセンス・免責・AI支援
 

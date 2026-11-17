@@ -552,7 +552,7 @@ public sealed class Plugin : IDalamudPlugin
         if (TimeProvider.System.GetElapsedTime(mainScenarioSessionStartedAt) < TimeSpan.FromSeconds(3)) return;
         try
         {
-            var progress = mainScenarioService.Capture();
+            var progress = mainScenarioService.Capture(contentId);
             if (progress is not null) Repository.SetMainScenario(contentId, progress);
             mainScenarioRetry.Reset();
         }

@@ -31,9 +31,15 @@ internal static class ConfigurationCodec
                 c.Jobs.Any(j => j.Level < 0 || j.Name is null || j.Abbreviation is null) ||
                 c.Jobs.Select(j => j.RowId).Distinct().Count() != c.Jobs.Count ||
                 (c.MainScenario is { } msq && (msq.QuestId == 0 || string.IsNullOrWhiteSpace(msq.QuestName) ||
-                    msq.Chapter is null || !Enum.IsDefined(msq.Status))))
+                    msq.Chapter is null || !Enum.IsDefined(msq.Status) ||
+                    (msq.ExpansionProgress is { } expansion && (expansion.Name is null ||
+                        !ValidCount(expansion.Overall) || !ValidCount(expansion.BaseCampaign))))))
                 throw new InvalidDataException("Invalid character or main-scenario data.");
         }
         return value;
     }
+
+    private static bool ValidCount(Models.QuestCompletion? value) => value is null ||
+        (value.MilestoneOnly ? value.Total == 0 && value.Completed == 0 :
+            value.Total > 0 && value.Total <= 10000 && value.Completed >= 0 && value.Completed <= value.Total);
 }

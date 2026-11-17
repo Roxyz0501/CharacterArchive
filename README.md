@@ -75,6 +75,12 @@ After a short login readiness period, the plugin checks already-received client 
 
 Completion is claimed only when a unique endpoint derived from the installed main-scenario quest graph is confirmed complete. Empty/unavailable guide data does not imply completion. Unavailable observations preserve existing data; the displayed time identifies the last changed recorded state. A new patch can change the endpoint. Internal guide structures can be affected by game updates; actual in-game acceptance remains unverified.
 
+### Expansion completion percentages
+
+Overview and character details show the expansion name and two quest-count percentages: **Expansion total** includes the installed post-launch patch chapters; **.0 main story** covers that expansion's launch journal chapter. They count completed required main quests on the character's route, not elapsed time or the internal quest sequence. Alternative starting routes are excluded; parallel prerequisites that are all required are included. A confirmed clear of the scope's final quest proves 100%, even after quest-data rewrites. Counts are shown in details when reconstructable; unresolved routes display Not acquired rather than an invented percentage.
+
+Percentages use one decimal place and never round unfinished progress up to 100%. They describe the installed game catalogue, so future patches may increase the expansion-total denominator. The expansion is the one containing the recorded guide quest (or the latest completed endpoint), not the newest expansion owned by the account. Existing offline records need a login/refresh to acquire the added fields. No extra server requests are made; unchanged received completion flags reuse cached calculations.
+
 ## Saving and recovery
 
 Settings and character snapshots apply in memory immediately and are saved by one changed-only, 60-second scheduler. Unchanged values (including edits reverted before the checkpoint) cause no write. Logout, normal game shutdown, and plugin unload flush pending changes unless saving has stopped after failures. Forced termination can lose the unsaved interval (normally up to about 60 seconds); backups do not recover it.
@@ -120,15 +126,11 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-The release package is `artifacts\CharacterArchive-1.1.0.1.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
+The release package is `artifacts\CharacterArchive-1.2.0.0.zip`. Plugin-specific tabs are followed by the canonical trailing group in the fixed order Settings, Language settings, Support. See [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md).
 
-## Third-party references and attribution
+## Third-party licenses
 
-- **BetterPlaytime**, by Infi, [repository](https://github.com/caitlyn-gg/BetterPlaytime), MIT License. Character Archive references its approach of invoking standard `/playtime` and observing `UIModule.PrintPlayTime` for minute-based playtime. Related code is in `GameChatCommandService.cs` and playtime response handling in `Plugin.cs`.
-- **Questionable**, by the Puni.sh Quest Squad, [repository](https://github.com/PunishXIV/Questionable), GNU AGPL v3 (upstream license). Its `QuestInfo` classification was consulted for the game-data `JournalGenre.Icon == 61412` main-scenario discriminator, then independently checked against installed game data. No Questionable code, quest scripts or assets are copied or redistributed; it is not a dependency.
-- **FFXIVClientStructs**, by aers and contributors, [repository](https://github.com/aers/FFXIVClientStructs), MIT License. Character Archive uses runtime public APIs including `UIModule`, `RaptureShellModule`, `Utf8String`, `QuestManager`, and `AgentScenarioTree`; it does not redistribute its binary or source.
-
-Required notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Third-party work is not represented as work authored by Roxyz0501.
+Applicable copyright notices and license texts are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## License, disclaimer, and AI assistance
 

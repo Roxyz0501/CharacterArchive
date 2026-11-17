@@ -133,7 +133,7 @@ public sealed class MainWindow : Window
 
         const ImGuiTableFlags flags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
                                       ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;
-        if (!ImGui.BeginTable("OverviewTable", 10, flags, new Vector2(0, -1)))
+        if (!ImGui.BeginTable("OverviewTable", 13, flags, new Vector2(0, -1)))
             return;
 
         ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale);
@@ -145,6 +145,9 @@ public sealed class MainWindow : Window
         ImGui.TableSetupColumn("Lv", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 42 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Playtime", "プレイ時間"), ImGuiTableColumnFlags.WidthFixed, 125 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Main Scenario", "メインクエスト"), ImGuiTableColumnFlags.WidthFixed, 240 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("Expansion", "拡張"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("Expansion total", "拡張全体"), ImGuiTableColumnFlags.WidthFixed, 85 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T(".0 main story", ".0本編"), ImGuiTableColumnFlags.WidthFixed, 85 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Last Detected", "最終検出"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupScrollFreeze(2, 1);
         ImGui.TableHeadersRow();
@@ -162,6 +165,9 @@ public sealed class MainWindow : Window
             Cell(record.Level.ToString());
             Cell(PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
             Cell(MainScenarioSummary(record.MainScenario));
+            Cell(record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+            Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall));
+            Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.BaseCampaign));
             Cell(record.LastSeenAt.ToString("yyyy/MM/dd HH:mm:ss"));
         }
 
@@ -194,6 +200,9 @@ public sealed class MainWindow : Window
                     Detail(T("Current Job / Level", "カレントジョブ / レベル"), $"{record.ClassJob} / {record.Level}");
                     Detail(T("Playtime", "プレイ時間"), PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
                     Detail(T("Main Scenario", "メインクエスト"), MainScenarioSummary(record.MainScenario));
+                    Detail(T("Expansion", "拡張"), record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+                    Detail(T("Expansion total", "拡張全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall, true));
+                    Detail(T(".0 main story", ".0本編"), FormatCompletion(record.MainScenario?.ExpansionProgress?.BaseCampaign, true));
                     Detail(T("Grand Company", "グランドカンパニー"), EmptyAsDash(record.GrandCompany));
                     Detail(T("Guardian Deity", "守護神"), EmptyAsDash(record.GuardianDeity));
                     Detail(T("Starting City", "開始都市"), EmptyAsDash(record.StartTown));
@@ -483,6 +492,9 @@ public sealed class MainWindow : Window
             Detail(T("Status", "状態"), MainScenarioState(progress.Status));
             Detail(T("Quest", "クエスト"), progress.QuestName);
             Detail(T("Chapter", "章"), progress.Chapter);
+            Detail(T("Expansion", "拡張"), progress.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+            Detail(T("Expansion total", "拡張全体"), FormatCompletion(progress.ExpansionProgress?.Overall, true));
+            Detail(T(".0 main story", ".0本編"), FormatCompletion(progress.ExpansionProgress?.BaseCampaign, true));
             Detail(T("Quest ID", "クエストID"), progress.QuestId.ToString());
             Detail(T("Quest sequence", "クエスト内部進行値"), progress.Sequence?.ToString() ?? "—");
             Detail(T("Last Detected", "最終検出"), progress.ObservedAt.ToString("yyyy/MM/dd HH:mm:ss"));
@@ -490,6 +502,15 @@ public sealed class MainWindow : Window
         }
         ImGui.TextWrapped(T("Reads received game data every 10 seconds while logged in. Offline characters show the last saved observation. Quest sequence is not a percentage.",
             "ログイン中は受信済みのゲーム情報を10秒ごとに読み取ります。未ログインのキャラクターは最後の記録を表示します。内部進行値は進捗率ではありません。"));
+        ImGui.TextWrapped(T("Percentages count completed required main quests, not play time. Expansion total includes installed patch chapters; .0 covers the launch story. Unchosen alternative routes are excluded; unresolved routes show Not acquired.",
+            "進捗率は必要なメインクエストの完了件数で、所要時間の割合ではありません。拡張全体は収録済みの後続パッチ、.0本編は発売時の章を対象とします。選択しなかったルートは除外し、ルート未確定時は未取得と表示します。"));
+    }
+
+    private string FormatCompletion(QuestCompletion? progress, bool includeCounts = false)
+    {
+        if (progress is null) return T("Not acquired", "未取得");
+        var percent = progress.Percent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+        return includeCounts && !progress.MilestoneOnly ? $"{percent}% ({progress.Completed}/{progress.Total})" : $"{percent}%";
     }
 
     private void DrawJobs(CharacterRecord record)
