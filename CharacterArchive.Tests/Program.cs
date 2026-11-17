@@ -9,6 +9,7 @@ CompletionTests.Run(failures);
 
 var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
 var mainWindowSource = File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Windows", "MainWindow.cs"));
+PlayTimeLogTests.Run(failures, File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Plugin.cs")));
 var standardTabsSource = File.ReadAllText(Path.Combine(projectRoot, "CharacterArchive", "Windows", "StandardPluginTabs.cs"));
 AssertEqual(1, CountOccurrences(mainWindowSource, "StandardPluginTabs.DrawStandardTrailingTabs("), "共通末尾タブ呼び出しは1回");
 Assert(!mainWindowSource.Contains("ImGui.BeginTabItem(T(\"Settings\"", StringComparison.Ordinal), "Settingsを個別描画しない");

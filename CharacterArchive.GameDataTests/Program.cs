@@ -10,6 +10,10 @@ var checks = 0;
 foreach (var language in new[] { Language.Japanese, Language.English, Language.German, Language.French })
 {
     using var game = new GameData(args[0], new LuminaOptions { DefaultExcelLanguage = language, CacheFileResources = false });
+    var playtimeTemplate = game.Excel.GetSheet<LogMessage>().GetRow(859).Text.ToMacroString();
+    if (!new[] { "lnum1", "lnum2", "lnum3" }.All(playtimeTemplate.Contains) || playtimeTemplate.Contains("lnum4"))
+        throw new Exception("Standard playtime log must use the three day/hour/minute local parameters.");
+    checks++;
     var quests = game.Excel.GetSheet<Quest>()
         .Where(q => q.RowId != 0 && q.JournalGenre.IsValid && q.JournalGenre.Value.Icon == 61412 && !string.IsNullOrWhiteSpace(q.Name.ToString()))
         .Select(q => new MainScenarioQuest(q.RowId, q.Name.ToString(), q.JournalGenre.Value.Name.ToString(),

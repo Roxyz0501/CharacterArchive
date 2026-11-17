@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\CharacterArchive\Services\PlayTimeLogReceiver.cs" Link="Services\PlayTimeLogReceiver.cs" />
     <Compile Include="..\CharacterArchive\Services\MainScenarioCompletionCalculator.cs" Link="Services\MainScenarioCompletionCalculator.cs" />
     <Compile Include="..\CharacterArchive\Services\OptionalResource.cs" Link="Services\OptionalResource.cs" />
     <Compile Include="..\CharacterArchive\Models\MainScenarioProgress.cs" Link="Models\MainScenarioProgress.cs" />

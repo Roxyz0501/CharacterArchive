@@ -3,13 +3,11 @@ using CharacterArchive.Services;
 using CharacterArchive.Windows;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
-using Dalamud.Hooking;
+using Dalamud.Game.Chat;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 
 namespace CharacterArchive;
@@ -40,9 +38,9 @@ public sealed class Plugin : IDalamudPlugin
     internal bool RecoveryBlocked => storage.RecoveryBlocked;
     internal bool ConfigurationRecovered => storage.Recovered;
     private int batchLookupRunning;
-    private readonly OptionalResource<Hook<UIModule.Delegates.HandlePacket>> playTimeHook = new();
-    private UIModule.Delegates.HandlePacket? playTimeOriginal;
-    internal bool PlayTimeAvailable => playTimeHook.Value?.IsEnabled == true;
+    private readonly OptionalResource<CallbackSubscription> playTimeSubscription = new();
+    private readonly PlayTimeLogReceiver playTimeReceiver;
+    internal bool PlayTimeAvailable => !disposed && playTimeSubscription.Value is not null && !playTimeReceiver.Stopped;
     private bool pendingPlayTimeRequest;
     private DateTime playTimeRequestAfter = DateTime.MinValue;
     private DateTime playTimeCommandReadySince = DateTime.MinValue;
@@ -57,7 +55,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
-    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static IChatGui Chat { get; private set; } = null!;
     [PluginService] internal static IGameLifecycle GameLifecycle { get; private set; } = null!;
 
@@ -65,7 +62,7 @@ public sealed class Plugin : IDalamudPlugin
     internal CharacterRepository Repository { get; }
     internal LocalizationService Localizer { get; }
 
-    public unsafe Plugin()
+    public Plugin()
     {
         mainScenarioService = new MainScenarioService(DataManager);
         storage = new DeferredConfigurationStore<Configuration>(PluginInterface.ConfigFile.FullName,
@@ -92,12 +89,19 @@ public sealed class Plugin : IDalamudPlugin
         storage.OnStopped = () => Chat.PrintError(Localizer.Text(
             "Saving stopped after three failures. Open Settings and retry saving.",
             "保存が3回失敗したため停止しました。設定から保存を再試行してください。"));
-        // Hook the virtual-table slot rather than allocating an inline reverse wrapper near the target.
-        playTimeHook.Initialize(
-            () => GameInteropProvider.HookFromFunctionPointerVariable<UIModule.Delegates.HandlePacket>(
-                (nint)(&UIModule.StaticVirtualTablePointer->HandlePacket), OnUiModulePacket),
-            hook => { playTimeOriginal = hook.Original; hook.Enable(); },
-            ex => Log.Warning(ex, "Playtime capture is unavailable; other features remain enabled."));
+        playTimeReceiver = new PlayTimeLogReceiver(
+            () => !disposed && ClientState.IsLoggedIn && PlayerState.IsLoaded ? PlayerState.ContentId : 0,
+            observation => completions.Enqueue(() => ApplyPlayTime(observation)),
+            ex => completions.Enqueue(() =>
+            {
+                Log.Warning(ex, "Playtime log acquisition stopped after three failures.");
+                Chat.PrintError(Localizer.Text("Playtime acquisition is unavailable. Reload the plugin to retry.",
+                    "プレイ時間の取得を利用できません。プラグインを再読み込みして再試行してください。"));
+            }));
+        playTimeSubscription.Initialize(
+            () => new CallbackSubscription(() => Chat.LogMessage -= OnLogMessage),
+            _ => Chat.LogMessage += OnLogMessage,
+            ex => Log.Warning(ex, "Playtime log acquisition is unavailable; other features remain enabled."));
         mainWindow = new MainWindow(this);
         windowSystem.AddWindow(mainWindow);
 
@@ -144,7 +148,8 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenMainUi -= mainWindow.Toggle;
         PluginInterface.UiBuilder.OpenConfigUi -= mainWindow.Toggle;
         CommandManager.RemoveHandler(CommandName);
-        playTimeHook.Dispose();
+        playTimeReceiver.Dispose();
+        playTimeSubscription.Dispose();
         try
         {
             operations.Dispose(); // Workers never await Framework.Run; cancellation/drain cannot deadlock the UI.
@@ -200,28 +205,13 @@ public sealed class Plugin : IDalamudPlugin
         playTimeCommandReadySince = DateTime.MinValue;
     }
 
-    private unsafe void OnUiModulePacket(UIModule* thisPtr, UIModulePacketType type, uint uintParam, void* packet)
+    private void OnLogMessage(ILogMessage message) => playTimeReceiver.Receive(new DalamudPlayTimeLog(message));
+
+    private void ApplyPlayTime(PlayTimeObservation observation)
     {
-        // Keep the original delegate valid even if an already-entered callback overlaps disposal.
-        playTimeOriginal!(thisPtr, type, uintParam, packet);
-
-        if (disposed || type != UIModulePacketType.PrintPlayTime || packet is null || !PlayerState.IsLoaded)
-            return;
-
-        try
-        {
-            var totalMinutes = unchecked((uint)Marshal.ReadInt32((nint)packet + 0x10));
-            storage.WithLock(() =>
-            {
-                var contentId = PlayerState.ContentId;
-                if (!Repository.SetPlayTime(contentId, totalMinutes)) pendingPlayTime = (contentId, totalMinutes);
-            });
-            Log.Information("Recorded playtime response.");
-        }
-        catch (Exception exception)
-        {
-            Log.Warning(exception, "Could not process the playtime response.");
-        }
+        if (!Repository.SetPlayTime(observation.ContentId, observation.Minutes) &&
+            ClientState.IsLoggedIn && PlayerState.IsLoaded && PlayerState.ContentId == observation.ContentId)
+            pendingPlayTime = (observation.ContentId, observation.Minutes);
     }
 
     internal void CaptureCurrentCharacter(bool retry = false) => storage.WithLock(() => CaptureCore(retry));
@@ -506,7 +496,7 @@ public sealed class Plugin : IDalamudPlugin
 
         if (pendingPlayTimeRequest && now >= playTimeRequestAfter && PlayerState.IsLoaded)
         {
-            if (playTimeRetry.Stopped) { pendingPlayTimeRequest = false; return; }
+            if (!PlayTimeAvailable || playTimeRetry.Stopped) { pendingPlayTimeRequest = false; return; }
             if (!GameChatCommandService.CanExecuteTextCommand())
             {
                 playTimeCommandReadySince = DateTime.MinValue;

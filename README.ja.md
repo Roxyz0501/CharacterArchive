@@ -105,6 +105,10 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 
 ## トラブルシューティング
 
+- 旧版でハウス入室・エリア移動時に終了する場合は、1.2.0.1へ更新しFFXIVを再起動してください。保存済み情報は保持します。Dalamud 15.0.4.0以降が必要です。
+- プレイ時間は標準のゲーム応答から取得します。通常のチャット本文や他人の発言は記録しません。
+
+
 - 1.1.0.0でインストール失敗として表示される起動時エラーを1.1.0.1で修正しました。プラグイン一覧を更新してインストールを再試行してください。設定ファイルは削除しないでください。
 - プレイ時間取得を初期化できなくても他の機能は利用でき、設定画面に案内を表示します。再試行はプラグインの再読み込みで行い、保存済みのプレイ時間は保持します。
 
@@ -128,7 +132,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.2.0.0.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.2.0.1.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者ライセンス
 
