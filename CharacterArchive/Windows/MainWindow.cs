@@ -19,6 +19,10 @@ public sealed class MainWindow : Window
     private readonly FileDialogManager fileDialogManager = new();
     private string statusMessage = string.Empty;
     private string batchLookupStatus = string.Empty;
+    private long sortedRevision = -1;
+    private int sortedColumn = -1;
+    private bool sortedDescending;
+    private CharacterRecord[] sortedOverview = [];
     private long snapshotRevision = -1;
     private IReadOnlyList<CharacterRecord> snapshot = [];
     private readonly HashSet<string> failedImages = new(StringComparer.OrdinalIgnoreCase);
@@ -137,13 +141,13 @@ public sealed class MainWindow : Window
             plugin.Configuration.HideCompletedMainScenario = hide;
             plugin.Repository.SaveSettings();
         }
-        const ImGuiTableFlags flags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
+        const ImGuiTableFlags flags = ImGuiTableFlags.Sortable | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
                                       ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;
         if (!ImGui.BeginTable("OverviewTable", 14, flags, new Vector2(0, -1)))
             return;
 
         ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn(T("Character Name", "キャラクター名"), ImGuiTableColumnFlags.WidthStretch, 1.5f);
+        ImGui.TableSetupColumn(T("Character Name", "キャラクター名"), ImGuiTableColumnFlags.DefaultSort | ImGuiTableColumnFlags.WidthStretch, 1.5f);
         ImGui.TableSetupColumn(T("Home World", "ホームワールド"), ImGuiTableColumnFlags.WidthFixed, 112 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Lodestone ID", "ロドストID"), ImGuiTableColumnFlags.WidthFixed, 90 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Current World", "現在地ワールド"), ImGuiTableColumnFlags.WidthFixed, 112 * ImGuiHelpers.GlobalScale);
@@ -159,8 +163,21 @@ public sealed class MainWindow : Window
         ImGui.TableSetupScrollFreeze(2, 1);
         ImGui.TableHeadersRow();
 
-        foreach (var record in records)
+        var specs = ImGui.TableGetSortSpecs();
+        int column = !specs.IsNull && specs.SpecsCount != 0 ? specs.Specs.ColumnIndex : 1;
+        bool descending = !specs.IsNull && specs.SpecsCount != 0 && specs.Specs.SortDirection == ImGuiSortDirection.Descending;
+        if (sortedRevision != snapshotRevision || sortedColumn != column || sortedDescending != descending)
         {
+            sortedOverview = records.ToArray();
+            Array.Sort(sortedOverview, (a, b) => CompareOverview(a, b, column, descending));
+            sortedRevision = snapshotRevision;
+            sortedColumn = column;
+            sortedDescending = descending;
+        }
+        if (!specs.IsNull) specs.SpecsDirty = false;
+        foreach (var record in sortedOverview)
+        {
+            if (plugin.Configuration.HiddenCharacterIds.Contains(record.ContentId)) continue;
             if (hide && record.MainScenario?.Status == MainScenarioStatus.UpToDate) continue;
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
@@ -184,6 +201,35 @@ public sealed class MainWindow : Window
         ImGui.EndTable();
     }
 
+    internal static int CompareOverview(CharacterRecord a, CharacterRecord b, int column, bool descending)
+    {
+        var x = descending ? b : a;
+        var y = descending ? a : b;
+        var names = StringComparer.OrdinalIgnoreCase;
+        var m = x.MainScenario?.ExpansionProgress;
+        var n = y.MainScenario?.ExpansionProgress;
+        static ulong? Id(string? s) => ulong.TryParse(s, out var id) ? id : null;
+        int result = column switch
+        {
+            0 => x.ProfileImageIsFace.CompareTo(y.ProfileImageIsFace),
+            2 => names.Compare(x.HomeWorld, y.HomeWorld),
+            3 => Nullable.Compare(Id(x.LodestoneId), Id(y.LodestoneId)),
+            4 => names.Compare(x.CurrentWorld, y.CurrentWorld),
+            5 => names.Compare(x.ClassJob, y.ClassJob),
+            6 => x.Level.CompareTo(y.Level),
+            7 => Nullable.Compare(x.PlayTimeMinutes, y.PlayTimeMinutes),
+            8 => names.Compare(x.MainScenario?.QuestName, y.MainScenario?.QuestName),
+            9 => Nullable.Compare(m?.Id, n?.Id),
+            10 => Nullable.Compare(m?.AllCampaigns?.Percent, n?.AllCampaigns?.Percent),
+            11 => Nullable.Compare(m?.Overall?.Percent, n?.Overall?.Percent),
+            12 => names.Compare(m?.Patch, n?.Patch),
+            13 => x.LastSeenAt.CompareTo(y.LastSeenAt),
+            _ => names.Compare(x.CharacterName, y.CharacterName),
+        };
+        if (result == 0 && column == 12) result = Nullable.Compare(m?.PatchProgress?.Percent, n?.PatchProgress?.Percent);
+        return result != 0 ? result : a.ContentId.CompareTo(b.ContentId);
+    }
+
     private void DrawDetails(IReadOnlyList<CharacterRecord> records)
     {
         if (records.Count == 0)
@@ -194,6 +240,7 @@ public sealed class MainWindow : Window
 
         foreach (var record in records)
         {
+            if (plugin.Configuration.HiddenCharacterIds.Contains(record.ContentId)) continue;
             if (!ImGui.CollapsingHeader($"{record.CharacterName} @ {record.HomeWorld}##{record.ContentId}",
                     ImGuiTreeNodeFlags.DefaultOpen))
                 continue;
@@ -314,6 +361,17 @@ public sealed class MainWindow : Window
 
     private void DrawSettings()
     {
+        if (ImGui.CollapsingHeader(T("Visible characters", "表示するキャラクター")))
+        {
+            foreach (var record in snapshot)
+            {
+                var visible = !plugin.Configuration.HiddenCharacterIds.Contains(record.ContentId);
+                if (!ImGui.Checkbox($"{record.CharacterName}@{record.HomeWorld}###visibility{record.ContentId}", ref visible)) continue;
+                if (visible) plugin.Configuration.HiddenCharacterIds.Remove(record.ContentId);
+                else plugin.Configuration.HiddenCharacterIds.Add(record.ContentId);
+                plugin.Repository.SaveSettings();
+            }
+        }
         if (!plugin.PlayTimeAvailable)
             ImGui.TextWrapped(T("Playtime acquisition is unavailable. Reload the plugin to retry.",
                 "プレイ時間の取得を利用できません。プラグインを再読み込みして再試行してください。"));

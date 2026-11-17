@@ -1,5 +1,9 @@
 # Character Archive publication state
 
+## 2026-11-17 — Character Archive 1.6.0.0
+
+- Sortable overview columns and persistent per-character visibility controls for overview and details. Mapping and CSV use the complete archive. Release build and core tests passed; in-game interaction not verified.
+
 ## 2026-11-17 — Character Archive 1.5.0.0
 
 - Overview now optionally hides records last observed as up to date. Incomplete and unknown records remain visible. Export and stored characters are unchanged.

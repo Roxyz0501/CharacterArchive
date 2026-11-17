@@ -10,6 +10,7 @@ public static partial class LocalizationCatalog
     private static readonly IReadOnlyDictionary<string, Entry> Entries = new Dictionary<string, Entry>(StringComparer.Ordinal)
     {
         ["Hide completed characters"] = new("最新メインクエスト完了キャラを非表示", "Charaktere mit abgeschlossenem Hauptszenario ausblenden", "Masquer les personnages à jour", "최신 주요 퀘스트 완료 캐릭터 숨기기", "隐藏已完成最新主线的角色", "隱藏已完成最新主線的角色"),
+        ["Visible characters"] = new("表示するキャラクター", "Sichtbare Charaktere", "Personnages visibles", "표시할 캐릭터", "显示的角色", "顯示的角色"),
         ["Expansion"] = new("拡張", "Erweiterung", "Extension", "확장팩", "资料片", "資料片"),
         ["MSQ total"] = new("メイン全体", "Hauptszenario gesamt", "Épopée totale", "전체 주요 퀘스트", "全部主线", "全部主線"),
         ["Expansion total"] = new("拡張全体", "Gesamte Erweiterung", "Extension complète", "확장팩 전체", "资料片整体", "資料片整體"),

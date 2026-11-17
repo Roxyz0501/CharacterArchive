@@ -8,6 +8,7 @@ public sealed class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 4;
     public List<CharacterRecord> Characters { get; set; } = [];
+    public HashSet<ulong> HiddenCharacterIds { get; set; } = [];
     public bool HideCompletedMainScenario { get; set; }
     public bool AutoLookupLodestoneId { get; set; }
     public string CsvExportDirectory { get; set; } = string.Empty;
