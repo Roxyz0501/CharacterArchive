@@ -2,12 +2,16 @@
 
 ## 2026-11-17 version 1.2.0.1
 
+- Source/tag: `4e8959942637257e0ac7b4886c5a175b1620aa9c`; anonymous public ZIP hash, four-file allowlist, manifest API15/minimum15.0.4.0/Author/RepoUrl/IconUrl and absence of the old receive hook in the public DLL verified. Repository/icon HTTP200 (image/png).
+- Shared index `3f65f01a1ecef5fb399881668aa2ddd9ce7e1341`, connector, pinned and normal main raw URLs verified at 1.2.0.1; all 16 other entries preserved.
+- After an explicit user deployment request, installed runtime files were updated to 1.2.0.1 while FFXIV was stopped. The installed DLL matches the public package; local profile/enabled/source state was preserved, previous runtime files backed up under ignored artifacts, and player configuration left untouched.
+
 - Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.2.0.1
 - ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.2.0.1/CharacterArchive-1.2.0.1.zip
 - ZIP 107,026 bytes; SHA-256 `A58453326D64CE9919E9F3D17864F056CC6576F3BD9E214674290E02FCCF2C5C`.
 - Removed the implicated plugin-owned UI packet detour, original-call forwarding and raw packet reads. Observe standard playtime LogMessage 859 through the supported managed event; copy only scalar parameters and queue normal framework updates. Three-failure stop, exception containment, subscription cleanup and optional-feature behavior retained. Requires Dalamud 15.0.4.0.
 - Crash evidence places the failure at/under original forwarding, outside the previous guard; exact exception subtype/underlying native target cause and other-plugin contributions cannot be established from the text record alone. See CRASH_FIX_2026-11-17.md.
-- Release built against actual Dalamud 15.0.4.0: zero warnings/errors; 28 new receiver checks plus 9 optional-resource, 18 expansion, 43 persistence, 57 review/core/UI localization checks passed. 112 offline data checks passed; runtime DLL metadata contains no old packet callback/raw reader/hook references. No live-game reproduction, command, installed-DLL replacement or player-data change performed. Restart FFXIV after updating before retesting housing entry.
+- Release built against actual Dalamud 15.0.4.0: zero warnings/errors; 28 new receiver checks plus 9 optional-resource, 18 expansion, 43 persistence, 57 review/core/UI localization checks passed. 112 offline data checks passed; runtime DLL metadata contains no old packet callback/raw reader/hook references. No live-game reproduction or command was performed during verification; the separately authorized local deployment is recorded above. Restart FFXIV after updating before retesting housing entry.
 
 ## 2026-11-17 version 1.2.0.0
 
