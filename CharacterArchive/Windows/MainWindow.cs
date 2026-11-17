@@ -131,6 +131,12 @@ public sealed class MainWindow : Window
             return;
         }
 
+        var hide = plugin.Configuration.HideCompletedMainScenario;
+        if (ImGui.Checkbox(T("Hide completed characters", "最新メインクエスト完了キャラを非表示"), ref hide))
+        {
+            plugin.Configuration.HideCompletedMainScenario = hide;
+            plugin.Repository.SaveSettings();
+        }
         const ImGuiTableFlags flags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
                                       ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;
         if (!ImGui.BeginTable("OverviewTable", 14, flags, new Vector2(0, -1)))
@@ -155,6 +161,7 @@ public sealed class MainWindow : Window
 
         foreach (var record in records)
         {
+            if (hide && record.MainScenario?.Status == MainScenarioStatus.UpToDate) continue;
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
             DrawFaceIcon(record);
@@ -167,9 +174,9 @@ public sealed class MainWindow : Window
             Cell(PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
             Cell(MainScenarioSummary(record.MainScenario));
             Cell(record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
-            Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns));
-            Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall));
-            Cell(FormatPatch(record.MainScenario?.ExpansionProgress));
+            ProgressCell(FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns), record.MainScenario?.ExpansionProgress?.AllCampaigns);
+            ProgressCell(FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall), record.MainScenario?.ExpansionProgress?.Overall);
+            ProgressCell(FormatPatch(record.MainScenario?.ExpansionProgress), record.MainScenario?.ExpansionProgress?.PatchProgress);
             Cell(record.LastSeenAt.ToString("yyyy/MM/dd HH:mm:ss"));
         }
 
@@ -203,9 +210,9 @@ public sealed class MainWindow : Window
                     Detail(T("Playtime", "プレイ時間"), PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
                     Detail(T("Main Scenario", "メインクエスト"), MainScenarioSummary(record.MainScenario));
                     Detail(T("Expansion", "拡張"), record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
-                    Detail(T("MSQ total", "メイン全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns, true));
-                    Detail(T("Expansion total", "拡張全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall, true));
-                    Detail(T("Current patch", "進行パッチ"), FormatPatch(record.MainScenario?.ExpansionProgress, true));
+                    ProgressDetail(T("MSQ total", "メイン全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns, true), record.MainScenario?.ExpansionProgress?.AllCampaigns);
+                    ProgressDetail(T("Expansion total", "拡張全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall, true), record.MainScenario?.ExpansionProgress?.Overall);
+                    ProgressDetail(T("Current patch", "進行パッチ"), FormatPatch(record.MainScenario?.ExpansionProgress, true), record.MainScenario?.ExpansionProgress?.PatchProgress);
                     Detail(T("Grand Company", "グランドカンパニー"), EmptyAsDash(record.GrandCompany));
                     Detail(T("Guardian Deity", "守護神"), EmptyAsDash(record.GuardianDeity));
                     Detail(T("Starting City", "開始都市"), EmptyAsDash(record.StartTown));
@@ -428,6 +435,30 @@ public sealed class MainWindow : Window
         lookupResults.Clear();
     }
 
+    private static void ProgressDetail(string label, string value, QuestCompletion? progress)
+    {
+        ImGui.TableNextRow();
+        Cell(label);
+        ProgressCell(value, progress);
+    }
+
+    private static void ProgressCell(string value, QuestCompletion? progress)
+    {
+        if (!ImGui.TableNextColumn()) return;
+        if (progress is null) { ImGui.TextUnformatted(value); return; }
+        var start = ImGui.GetCursorScreenPos();
+        var size = new Vector2(Math.Max(1f, ImGui.GetContentRegionAvail().X), ImGui.GetTextLineHeight());
+        float fraction = Math.Clamp((float)progress.Percent / 100f, 0f, 1f);
+        var draw = ImGui.GetWindowDrawList();
+        draw.AddRectFilled(start, start + size, 0xff313131);
+        if (fraction > 0)
+        {
+            var tint = Vector4.Lerp(new Vector4(.46f, .24f, .10f, 1), new Vector4(.08f, .40f, .28f, 1), fraction);
+            draw.AddRectFilled(start, start + new Vector2(size.X * fraction, size.Y), ImGui.ColorConvertFloat4ToU32(tint));
+        }
+        ImGui.TextColored(Vector4.One, value);
+    }
+
     private static void Cell(string value)
     {
         ImGui.TableNextColumn();
@@ -496,9 +527,9 @@ public sealed class MainWindow : Window
             Detail(T("Quest", "クエスト"), progress.QuestName);
             Detail(T("Chapter", "章"), progress.Chapter);
             Detail(T("Expansion", "拡張"), progress.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
-            Detail(T("MSQ total", "メイン全体"), FormatCompletion(progress.ExpansionProgress?.AllCampaigns, true));
-            Detail(T("Expansion total", "拡張全体"), FormatCompletion(progress.ExpansionProgress?.Overall, true));
-            Detail(T("Current patch", "進行パッチ"), FormatPatch(progress.ExpansionProgress, true));
+            ProgressDetail(T("MSQ total", "メイン全体"), FormatCompletion(progress.ExpansionProgress?.AllCampaigns, true), progress.ExpansionProgress?.AllCampaigns);
+            ProgressDetail(T("Expansion total", "拡張全体"), FormatCompletion(progress.ExpansionProgress?.Overall, true), progress.ExpansionProgress?.Overall);
+            ProgressDetail(T("Current patch", "進行パッチ"), FormatPatch(progress.ExpansionProgress, true), progress.ExpansionProgress?.PatchProgress);
             Detail(T("Quest ID", "クエストID"), progress.QuestId.ToString());
             Detail(T("Quest sequence", "クエスト内部進行値"), progress.Sequence?.ToString() ?? "—");
             Detail(T("Last Detected", "最終検出"), progress.ObservedAt.ToString("yyyy/MM/dd HH:mm:ss"));

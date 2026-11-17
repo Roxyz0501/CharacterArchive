@@ -1,5 +1,15 @@
 # Character Archive publication state
 
+## 2026-11-17 — Character Archive 1.5.0.0
+
+- Overview now optionally hides records last observed as up to date. Incomplete and unknown records remain visible. Export and stored characters are unchanged.
+- Overview and detail progress cells use proportional colored fills with numeric labels. Release build passed without warnings and all core tests passed; live rendering not tested.
+
+## 2026-11-17 — Character Archive 1.4.0.0
+
+- Current patch progress published: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.4.0.0 . Core tests passed; shared index and downloaded ZIP hash verified. In-game display not tested.
+
+
 ## 2026-11-17 version 1.2.0.1
 
 - Source/tag: `4e8959942637257e0ac7b4886c5a175b1620aa9c`; anonymous public ZIP hash, four-file allowlist, manifest API15/minimum15.0.4.0/Author/RepoUrl/IconUrl and absence of the old receive hook in the public DLL verified. Repository/icon HTTP200 (image/png).
