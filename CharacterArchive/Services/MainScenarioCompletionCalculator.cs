@@ -7,6 +7,8 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
 {
     private ulong cachedContentId;
     private uint cachedQuestId;
+    private bool cachedActive;
+    private readonly Dictionary<uint, MainScenarioQuest> all = quests.ToDictionary(q => q.Key, q => q.Value);
     private byte[]? cachedFlags;
     private MainScenarioExpansion? cached;
     private readonly Dictionary<(uint Expansion, bool Base), Dictionary<uint, MainScenarioQuest>> scopes = [];
@@ -15,7 +17,7 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
         ReadOnlySpan<byte> completionFlags, Func<uint, bool> completed)
     {
         if (cachedFlags is not null && cachedContentId == contentId && cachedQuestId == progress.QuestId &&
-            completionFlags.SequenceEqual(cachedFlags)) return cached;
+            cachedActive == (progress.Status == MainScenarioStatus.InProgress) && completionFlags.SequenceEqual(cachedFlags)) return cached;
         if (!quests.TryGetValue(progress.QuestId, out var current)) return null;
         var memo = new Dictionary<uint, bool>();
         bool IsCompleted(uint id)
@@ -25,7 +27,11 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
         }
         cached = new(current.ExpansionId, current.ExpansionName,
             Count(GetScope(current.ExpansionId, false), progress.QuestId, IsCompleted),
-            Count(GetScope(current.ExpansionId, true), progress.QuestId, IsCompleted));
+            Count(GetScope(current.ExpansionId, true), progress.QuestId, IsCompleted))
+        {
+            AllCampaigns = Count(all, progress.QuestId, IsCompleted, progress.Status == MainScenarioStatus.InProgress),
+        };
+        cachedActive = progress.Status == MainScenarioStatus.InProgress;
         cachedContentId = contentId;
         cachedQuestId = progress.QuestId;
         cachedFlags = completionFlags.ToArray();
@@ -42,7 +48,7 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
         return scopes[key] = rows.Where(q => !baseCampaign || q.GenreId == baseGenre).ToDictionary(q => q.Id);
     }
 
-    private static QuestCompletion? Count(Dictionary<uint, MainScenarioQuest> scope, uint current, Func<uint, bool> completed)
+    private static QuestCompletion? Count(Dictionary<uint, MainScenarioQuest> scope, uint current, Func<uint, bool> completed, bool active = false)
     {
         var ends = MainScenarioResolver.FindTerminalIds(scope.Values);
         if (ends.Length != 1) return null;
@@ -90,6 +96,8 @@ internal sealed class MainScenarioCompletionCalculator(IReadOnlyDictionary<uint,
         }
 
         if (!Visit(ends[0]) || required.Count == 0) return null;
-        return new(required.Count(completed), required.Count);
+        var inferred = active && required.Contains(current) ? Ancestors(current) : new HashSet<uint>();
+        inferred.Remove(current);
+        return new(required.Count(id => inferred.Contains(id) || completed(id)), required.Count);
     }
 }

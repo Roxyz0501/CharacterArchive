@@ -33,7 +33,7 @@ internal static class ConfigurationCodec
                 (c.MainScenario is { } msq && (msq.QuestId == 0 || string.IsNullOrWhiteSpace(msq.QuestName) ||
                     msq.Chapter is null || !Enum.IsDefined(msq.Status) ||
                     (msq.ExpansionProgress is { } expansion && (expansion.Name is null ||
-                        !ValidCount(expansion.Overall) || !ValidCount(expansion.BaseCampaign))))))
+                        !ValidCount(expansion.AllCampaigns) || !ValidCount(expansion.Overall) || !ValidCount(expansion.BaseCampaign))))))
                 throw new InvalidDataException("Invalid character or main-scenario data.");
         }
         return value;

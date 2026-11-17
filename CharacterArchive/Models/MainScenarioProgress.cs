@@ -8,7 +8,10 @@ public sealed record MainScenarioProgress(uint QuestId, string QuestName, string
     public MainScenarioExpansion? ExpansionProgress { get; init; }
 }
 
-public sealed record MainScenarioExpansion(uint Id, string Name, QuestCompletion? Overall, QuestCompletion? BaseCampaign);
+public sealed record MainScenarioExpansion(uint Id, string Name, QuestCompletion? Overall, QuestCompletion? BaseCampaign)
+{
+    public QuestCompletion? AllCampaigns { get; init; }
+}
 
 public sealed record QuestCompletion(int Completed, int Total, bool MilestoneOnly = false)
 {

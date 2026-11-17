@@ -133,7 +133,7 @@ public sealed class MainWindow : Window
 
         const ImGuiTableFlags flags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg |
                                       ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;
-        if (!ImGui.BeginTable("OverviewTable", 13, flags, new Vector2(0, -1)))
+        if (!ImGui.BeginTable("OverviewTable", 14, flags, new Vector2(0, -1)))
             return;
 
         ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale);
@@ -146,6 +146,7 @@ public sealed class MainWindow : Window
         ImGui.TableSetupColumn(T("Playtime", "プレイ時間"), ImGuiTableColumnFlags.WidthFixed, 125 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Main Scenario", "メインクエスト"), ImGuiTableColumnFlags.WidthFixed, 240 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Expansion", "拡張"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("MSQ total", "メイン全体"), ImGuiTableColumnFlags.WidthFixed, 85 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Expansion total", "拡張全体"), ImGuiTableColumnFlags.WidthFixed, 85 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T(".0 main story", ".0本編"), ImGuiTableColumnFlags.WidthFixed, 85 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Last Detected", "最終検出"), ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
@@ -166,6 +167,7 @@ public sealed class MainWindow : Window
             Cell(PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
             Cell(MainScenarioSummary(record.MainScenario));
             Cell(record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+            Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns));
             Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall));
             Cell(FormatCompletion(record.MainScenario?.ExpansionProgress?.BaseCampaign));
             Cell(record.LastSeenAt.ToString("yyyy/MM/dd HH:mm:ss"));
@@ -201,6 +203,7 @@ public sealed class MainWindow : Window
                     Detail(T("Playtime", "プレイ時間"), PlayTimeFormatter.Format(record.PlayTimeMinutes, plugin.Configuration.PlayTimeDisplayMode, plugin.Localizer.Current));
                     Detail(T("Main Scenario", "メインクエスト"), MainScenarioSummary(record.MainScenario));
                     Detail(T("Expansion", "拡張"), record.MainScenario?.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+                    Detail(T("MSQ total", "メイン全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.AllCampaigns, true));
                     Detail(T("Expansion total", "拡張全体"), FormatCompletion(record.MainScenario?.ExpansionProgress?.Overall, true));
                     Detail(T(".0 main story", ".0本編"), FormatCompletion(record.MainScenario?.ExpansionProgress?.BaseCampaign, true));
                     Detail(T("Grand Company", "グランドカンパニー"), EmptyAsDash(record.GrandCompany));
@@ -493,6 +496,7 @@ public sealed class MainWindow : Window
             Detail(T("Quest", "クエスト"), progress.QuestName);
             Detail(T("Chapter", "章"), progress.Chapter);
             Detail(T("Expansion", "拡張"), progress.ExpansionProgress?.Name ?? T("Not acquired", "未取得"));
+            Detail(T("MSQ total", "メイン全体"), FormatCompletion(progress.ExpansionProgress?.AllCampaigns, true));
             Detail(T("Expansion total", "拡張全体"), FormatCompletion(progress.ExpansionProgress?.Overall, true));
             Detail(T(".0 main story", ".0本編"), FormatCompletion(progress.ExpansionProgress?.BaseCampaign, true));
             Detail(T("Quest ID", "クエストID"), progress.QuestId.ToString());

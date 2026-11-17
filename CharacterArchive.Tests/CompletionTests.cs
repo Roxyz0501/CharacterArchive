@@ -32,7 +32,11 @@ internal static class CompletionTests
         var priorReads = reads;
         var same = calculator.Calculate(1, current, new byte[] { 1 }, Completed);
         Check(ReferenceEquals(result, same) && reads == priorReads, "unchanged flags/current quest cause zero completion API reads");
-        Check(reads <= 8, "full and .0 share memoized completion reads within current expansion");
+        Check(reads <= quests.Count, "all scopes share memoized completion reads");
+        Check(result.AllCampaigns == new QuestCompletion(3, 8), "global denominator spans both expansions");
+        var inferred = new MainScenarioCompletionCalculator(quests);
+        Check(inferred.Calculate(7, current, [1], id => id == 65537)?.AllCampaigns == new QuestCompletion(2, 8), "accepted quest proves prerequisites but not itself or its parallel sibling");
+        Check(inferred.Calculate(7, current with { Status = MainScenarioStatus.Available }, [1], id => id == 65537)?.AllCampaigns == new QuestCompletion(1, 8), "available is not proof of acceptance");
         done.Add(65540);
         var changed = calculator.Calculate(1, current, new byte[] { 2 }, Completed)!;
         Check(changed.Overall == new QuestCompletion(4, 7) && changed.BaseCampaign == new QuestCompletion(4, 5), "completion flag changes refresh percentages even if guide quest stays unchanged");
