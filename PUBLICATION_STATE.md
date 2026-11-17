@@ -2,9 +2,11 @@
 
 ## 2026-11-17 version 1.2.0.0
 
-- Publication explicitly requested by the user on 2026-11-17, resolving the earlier parent-task-only approval block. The existing verified local ZIP is unchanged. Public verification is recorded below after Release/index publication.
-- Planned release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.2.0.0
-- Planned ZIP URL: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.2.0.0/CharacterArchive-1.2.0.0.zip
+- Published after the user's explicit 2026-11-17 request, resolving the earlier approval block. The existing verified ZIP is unchanged.
+- Source/tag: `3b11ac3c6966723b16d259b1ad88cd0190eb47b1`; public repository/icon HTTP200 (image/png), anonymous ZIP hash, four-file allowlist and manifest version/API15/Author/RepoUrl/IconUrl verified.
+- Shared index `3eac912d88189c11cc28787f8f2ba8ae05e88b9c`: connector, pinned and normal main raw URLs verified at 1.2.0.0; all 16 other entries preserved.
+- Release: https://github.com/Roxyz0501/CharacterArchive/releases/tag/v1.2.0.0
+- ZIP: https://github.com/Roxyz0501/CharacterArchive/releases/download/v1.2.0.0/CharacterArchive-1.2.0.0.zip
 - ZIP 105,338 bytes; SHA-256 `68EEB86F6EDE3A23095C94DC7634D990CDDF30AB8BA231FE78AC5E198C520D2D`.
 - Added current expansion name and separate full-expansion / .0 launch-story completion percentages to Overview and character details. Required-route quest counts, OR/AND handling, installed-patch scope, milestone completion and unavailable observations are distinct. Existing settings/CSV and optional-hook fix retained.
 - Clean locked-dependency Release build zero warnings/errors; 18 new completion checks plus nine optional-resource, 43 persistence, 57 review and existing core/UI seven-language checks passed. 108 offline checks cover six expansions/four data languages. Unchanged masks cause zero additional completion reads and unchanged observations cause zero dirty marks; no new server requests. See EXPANSION_PROGRESS_VALIDATION.md. Actual native integration/layout remains unverified; installed DLLs/player configuration untouched.
