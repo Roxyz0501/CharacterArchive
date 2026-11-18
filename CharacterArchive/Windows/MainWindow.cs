@@ -19,6 +19,7 @@ public sealed class MainWindow : Window
     private readonly FileDialogManager fileDialogManager = new();
     private string statusMessage = string.Empty;
     private string batchLookupStatus = string.Empty;
+    private ulong sortedPin;
     private long sortedRevision = -1;
     private int sortedColumn = -1;
     private bool sortedDescending;
@@ -135,6 +136,13 @@ public sealed class MainWindow : Window
             return;
         }
 
+        var pin = plugin.Configuration.PinCurrentCharacter;
+        if (ImGui.Checkbox(T("Pin logged-in character", "ログイン中のキャラクターを先頭に表示"), ref pin))
+        {
+            plugin.Configuration.PinCurrentCharacter = pin;
+            plugin.Repository.SaveSettings();
+        }
+        ulong pinned = pin && Plugin.ClientState.IsLoggedIn && Plugin.PlayerState.IsLoaded ? Plugin.PlayerState.ContentId : 0;
         var hide = plugin.Configuration.HideCompletedMainScenario;
         if (ImGui.Checkbox(T("Hide completed characters", "最新メインクエスト完了キャラを非表示"), ref hide))
         {
@@ -166,10 +174,15 @@ public sealed class MainWindow : Window
         var specs = ImGui.TableGetSortSpecs();
         int column = !specs.IsNull && specs.SpecsCount != 0 ? specs.Specs.ColumnIndex : 1;
         bool descending = !specs.IsNull && specs.SpecsCount != 0 && specs.Specs.SortDirection == ImGuiSortDirection.Descending;
-        if (sortedRevision != snapshotRevision || sortedColumn != column || sortedDescending != descending)
+        if (sortedPin != pinned || sortedRevision != snapshotRevision || sortedColumn != column || sortedDescending != descending)
         {
             sortedOverview = records.ToArray();
-            Array.Sort(sortedOverview, (a, b) => CompareOverview(a, b, column, descending));
+            sortedPin = pinned;
+            Array.Sort(sortedOverview, (a, b) =>
+            {
+                int priority = (pinned != 0 && b.ContentId == pinned).CompareTo(pinned != 0 && a.ContentId == pinned);
+                return priority != 0 ? priority : CompareOverview(a, b, column, descending);
+            });
             sortedRevision = snapshotRevision;
             sortedColumn = column;
             sortedDescending = descending;

@@ -1,5 +1,9 @@
 # Character Archive publication state
 
+## 2026-11-18 — Character Archive 1.7.0.0
+
+- Optional current-character pin in Overview; default off. Existing visibility filters remain authoritative.
+
 ## 2026-11-17 — Character Archive 1.6.0.0
 
 - Sortable overview columns and persistent per-character visibility controls for overview and details. Mapping and CSV use the complete archive. Release build and core tests passed; in-game interaction not verified.
