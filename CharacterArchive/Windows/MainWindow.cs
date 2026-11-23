@@ -19,6 +19,7 @@ public sealed class MainWindow : Window
     private readonly FileDialogManager fileDialogManager = new();
     private string statusMessage = string.Empty;
     private string batchLookupStatus = string.Empty;
+    private long nextRelogClick;
     private ulong sortedPin;
     private long sortedRevision = -1;
     private int sortedColumn = -1;
@@ -188,6 +189,8 @@ public sealed class MainWindow : Window
             sortedDescending = descending;
         }
         if (!specs.IsNull) specs.SpecsDirty = false;
+        bool loggedIn = Plugin.ClientState.IsLoggedIn && Plugin.PlayerState.IsLoaded;
+        ulong currentId = loggedIn ? Plugin.PlayerState.ContentId : 0;
         foreach (var record in sortedOverview)
         {
             if (plugin.Configuration.HiddenCharacterIds.Contains(record.ContentId)) continue;
@@ -196,6 +199,19 @@ public sealed class MainWindow : Window
             ImGui.TableNextColumn();
             DrawFaceIcon(record);
             Cell(record.CharacterName);
+            ImGui.SameLine();
+            ImGui.BeginDisabled(currentId == 0 || currentId == record.ContentId || Environment.TickCount64 < nextRelogClick);
+            if (ImGui.SmallButton($"{T("Switch", "切替")}##relog{record.ContentId}"))
+            {
+                nextRelogClick = Environment.TickCount64 + 5000;
+                var target = $"{record.CharacterName}@{record.HomeWorld}";
+                if (!target.Any(char.IsControl) && !string.IsNullOrWhiteSpace(record.CharacterName) && !string.IsNullOrWhiteSpace(record.HomeWorld))
+                {
+                    statusMessage = Plugin.CommandManager.ProcessCommand($"/autoretainer relog {target}")
+                        ? $"AutoRetainer → {target}" : T("Enable AutoRetainer to switch.", "切替にはAutoRetainerを有効にしてください。");
+                }
+            }
+            ImGui.EndDisabled();
             Cell(record.HomeWorld);
             Cell(record.LodestoneId ?? string.Empty);
             Cell(record.CurrentWorld);

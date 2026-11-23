@@ -1,5 +1,9 @@
 # Character Archive publication state
 
+## 2026-11-23 — Character Archive 1.8.0.0
+
+- User-triggered character switching through the optional AutoRetainer local command. No upstream implementation copied; no custom packets.
+
 ## 2026-11-18 — Character Archive 1.7.0.0
 
 - Optional current-character pin in Overview; default off. Existing visibility filters remain authoritative.

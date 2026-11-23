@@ -12,6 +12,8 @@ public static partial class LocalizationCatalog
         ["Hide completed characters"] = new("最新メインクエスト完了キャラを非表示", "Charaktere mit abgeschlossenem Hauptszenario ausblenden", "Masquer les personnages à jour", "최신 주요 퀘스트 완료 캐릭터 숨기기", "隐藏已完成最新主线的角色", "隱藏已完成最新主線的角色"),
         ["Visible characters"] = new("表示するキャラクター", "Sichtbare Charaktere", "Personnages visibles", "표시할 캐릭터", "显示的角色", "顯示的角色"),
         ["Pin logged-in character"] = new("ログイン中のキャラクターを先頭に表示", "Angemeldeten Charakter zuerst anzeigen", "Afficher le personnage connecté en premier", "접속 중인 캐릭터를 맨 위에 표시", "置顶当前登录角色", "置頂目前登入角色"),
+        ["Switch"] = new("切替", "Wechseln", "Changer", "전환", "切换", "切換"),
+        ["Enable AutoRetainer to switch."] = new("切替にはAutoRetainerを有効にしてください。", "Zum Wechseln AutoRetainer aktivieren.", "Activez AutoRetainer pour changer.", "전환하려면 AutoRetainer를 활성화하세요.", "请启用 AutoRetainer 以切换角色。", "請啟用 AutoRetainer 以切換角色。"),
         ["Expansion"] = new("拡張", "Erweiterung", "Extension", "확장팩", "资料片", "資料片"),
         ["MSQ total"] = new("メイン全体", "Hauptszenario gesamt", "Épopée totale", "전체 주요 퀘스트", "全部主线", "全部主線"),
         ["Expansion total"] = new("拡張全体", "Gesamte Erweiterung", "Extension complète", "확장팩 전체", "资料片整体", "資料片整體"),
