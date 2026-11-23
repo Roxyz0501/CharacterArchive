@@ -155,7 +155,7 @@ public sealed class MainWindow : Window
         if (!ImGui.BeginTable("OverviewTable", 14, flags, new Vector2(0, -1)))
             return;
 
-        ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn(T("Face", "顔"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize, 48 * ImGuiHelpers.GlobalScale + ImGui.CalcTextSize(T("Switch", "切替")).X + 2 * ImGui.GetStyle().FramePadding.X + ImGui.GetStyle().ItemSpacing.X);
         ImGui.TableSetupColumn(T("Character Name", "キャラクター名"), ImGuiTableColumnFlags.DefaultSort | ImGuiTableColumnFlags.WidthStretch, 1.5f);
         ImGui.TableSetupColumn(T("Home World", "ホームワールド"), ImGuiTableColumnFlags.WidthFixed, 112 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn(T("Lodestone ID", "ロドストID"), ImGuiTableColumnFlags.WidthFixed, 90 * ImGuiHelpers.GlobalScale);
@@ -197,9 +197,6 @@ public sealed class MainWindow : Window
             if (hide && record.MainScenario?.Status == MainScenarioStatus.UpToDate) continue;
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            DrawFaceIcon(record);
-            Cell(record.CharacterName);
-            ImGui.SameLine();
             ImGui.BeginDisabled(currentId == 0 || currentId == record.ContentId || Environment.TickCount64 < nextRelogClick);
             if (ImGui.SmallButton($"{T("Switch", "切替")}##relog{record.ContentId}"))
             {
@@ -212,6 +209,9 @@ public sealed class MainWindow : Window
                 }
             }
             ImGui.EndDisabled();
+            ImGui.SameLine();
+            DrawFaceIcon(record);
+            Cell(record.CharacterName);
             Cell(record.HomeWorld);
             Cell(record.LodestoneId ?? string.Empty);
             Cell(record.CurrentWorld);

@@ -1,5 +1,9 @@
 # Character Archive publication state
 
+## 2026-11-23 — Character Archive 1.8.0.1
+
+- Move the switch button before the portrait without changing column sorting or relog behavior.
+
 ## 2026-11-23 — Character Archive 1.8.0.0
 
 - User-triggered character switching through the optional AutoRetainer local command. No upstream implementation copied; no custom packets.
