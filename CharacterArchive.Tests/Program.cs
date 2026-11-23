@@ -18,7 +18,8 @@ Assert(mainWindowSource.IndexOf("Character File Mapping", StringComparison.Ordin
 var settingsTabIndex = standardTabsSource.IndexOf("settingsLabel}###{settingsStableId}", StringComparison.Ordinal);
 var languageTabIndex = standardTabsSource.IndexOf("languageSettingsLabel}###LanguageSettings", StringComparison.Ordinal);
 var supportTabIndex = standardTabsSource.IndexOf("supportLabel}###Support", StringComparison.Ordinal);
-Assert(settingsTabIndex >= 0 && settingsTabIndex < languageTabIndex && languageTabIndex < supportTabIndex,
+var infoTabIndex = standardTabsSource.IndexOf("infoLabel}###DependencyInfo", StringComparison.Ordinal);
+Assert(settingsTabIndex >= 0 && settingsTabIndex < infoTabIndex && infoTabIndex < languageTabIndex && languageTabIndex < supportTabIndex,
     "共通末尾タブ順はSettings→Language settings→Support");
 
 AssertEqual(DisplayLanguage.Japanese, LanguageResolver.Initialize(null, "Japanese", "en"), "ゲーム日本語優先");

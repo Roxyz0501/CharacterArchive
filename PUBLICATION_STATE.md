@@ -1,5 +1,9 @@
 # Character Archive publication state
 
+## 2026-11-23 — Character Archive 1.9.0.0
+
+- Shared dependency Information tab; AutoRetainer optional for character switching. Local status checks and user-initiated installer/guide.
+
 ## 2026-11-23 — Character Archive 1.8.0.1
 
 - Move the switch button before the portrait without changing column sorting or relog behavior.

@@ -20,6 +20,11 @@ public sealed class MainWindow : Window
     private string statusMessage = string.Empty;
     private string batchLookupStatus = string.Empty;
     private long nextRelogClick;
+    private readonly StandardPluginInfo dependencyInfo = new(new PluginDependency("AutoRetainer", "AutoRetainer", false,
+        new("Character switching", "キャラクター切替", "Charakterwechsel", "Changement de personnage", "캐릭터 전환", "角色切换", "角色切換"),
+        new("Register the target in AutoRetainer first.", "切替先のキャラクターはAutoRetainer側にも登録が必要です。", "Ziel vorher in AutoRetainer registrieren.", "Enregistrez la cible dans AutoRetainer.", "대상을 AutoRetainer에 먼저 등록하세요.", "请先在 AutoRetainer 注册目标角色。", "請先在 AutoRetainer 登錄目標角色。"),
+        "https://github.com/PunishXIV/AutoRetainer"));
+    private string InfoLanguage => ToLanguageCode(plugin.Configuration.DisplayLanguage ?? DisplayLanguage.English);
     private ulong sortedPin;
     private long sortedRevision = -1;
     private int sortedColumn = -1;
@@ -81,7 +86,7 @@ public sealed class MainWindow : Window
             T("Language settings", "言語設定"),
             DrawLanguageSettings,
             T("Support", "支援"),
-            DrawSupport);
+            DrawSupport, StandardPluginInfo.Title(InfoLanguage), () => dependencyInfo.Draw(Plugin.PluginInterface, InfoLanguage));
 
         ImGui.EndTabBar();
     }

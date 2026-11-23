@@ -1,5 +1,7 @@
 # Character Archive
 
+「情報」タブでは依存プラグインの状態を確認できます。「導入する」でDalamudの検索済みインストーラーを開きます。検索に出ない場合は「導入案内」を参照してください。
+
 概要の「切替」は、[AutoRetainer (PunishXIV)](https://github.com/PunishXIV/AutoRetainer) の登録済みキャラクターに対して公開コマンド `/autoretainer relog 名前@ホームワールド` を呼び出します。切替時のみAutoRetainerが必要です。
 
 [English](README.md)
@@ -107,7 +109,7 @@ FFXIV設定フォルダは読み取るだけです。Lodestone HTTPS通信は検
 
 ## トラブルシューティング
 
-- 旧版でハウス入室・エリア移動時に終了する場合は、1.8.0.1へ更新しFFXIVを再起動してください。保存済み情報は保持します。Dalamud 15.0.4.0以降が必要です。
+- 旧版でハウス入室・エリア移動時に終了する場合は、1.9.0.0へ更新しFFXIVを再起動してください。保存済み情報は保持します。Dalamud 15.0.4.0以降が必要です。
 - プレイ時間は標準のゲーム応答から取得します。通常のチャット本文や他人の発言は記録しません。
 
 
@@ -134,7 +136,7 @@ dotnet run --project .\CharacterArchive.Tests\CharacterArchive.Tests.csproj -c R
 powershell -ExecutionPolicy Bypass -File .\scripts\pack-release.ps1 -NoBuild
 ```
 
-Release成果物は`artifacts\CharacterArchive-1.8.0.1.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
+Release成果物は`artifacts\CharacterArchive-1.9.0.0.zip`です。固有タブの後ろに、正本の末尾グループを「設定 → 情報 → 言語設定 → 支援」の固定順で配置します。[PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)も参照してください。
 
 ## 第三者ライセンス
 
